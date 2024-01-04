@@ -1,0 +1,38 @@
+version: "3"
+services:
+  snack-server:
+    build:
+      context: ./
+      dockerfile: ./Dockerfile.local
+    image: snack-server-image
+    container_name: snack-server
+    volumes:
+      - ./:/app
+      - ./:/Applications
+    environment:
+      DB_DATABASE_NAME: ${DB_DATABASE_NAME}
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - 3100:3100
+    entrypoint:
+      - /entrypoint.local.sh
+    links:
+      - snack-postgres
+    networks:
+      - snack-net
+  snack-postgres:
+    image: "postgres:${DB_VERSION}"
+    container_name: snack-postgres
+    environment:
+      POSTGRES_DB: ${DB_DATABASE_NAME} 
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD} 
+    volumes:
+      - ${DB_DIR}:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
+    networks:
+      - snack-net
+networks:
+  snack-net:

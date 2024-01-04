@@ -1,0 +1,22 @@
+FROM alpine:3.17
+RUN apk add build-base libpq postgresql-dev
+
+FROM python:3.11.7
+ENV PYTHONUNBUFFERED 1
+
+ENV LC_ALL=C.UTF-8
+
+COPY . /app
+WORKDIR /app
+
+RUN mkdir -p /app/status \
+  && mkdir -p /app/media
+
+RUN python -m pip install pip  --upgrade \
+  && pip3 install -r requirements.txt \
+  && pip3 install -r requirements-dev.txt
+
+EXPOSE 3100
+
+COPY sh/entrypoints/entrypoint.local.sh /entrypoint.local.sh
+RUN chmod +x /entrypoint.local.sh
