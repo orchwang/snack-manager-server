@@ -161,3 +161,4 @@ cython_debug/
 
 # Snack Project
 .env.docker-compose
+static/
