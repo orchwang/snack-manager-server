@@ -9,5 +9,6 @@ pytest
 pytest-django
 pytest-pylint
 pytest-xdist
+coverage
 requests-mock
 tox
