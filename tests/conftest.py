@@ -1,2 +1,2 @@
-from .fixtures.snacks import *
 from .fixtures.users import *
+from .fixtures.orders import *

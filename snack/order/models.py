@@ -15,7 +15,7 @@ def snack_image_path(instance, filename):
 
 class Snack(models.Model):
     uid = ShortUUIDField(unique=True, editable=False, db_index=True)
-    name = models.CharField(primary_key=True, unique=True, max_length=128, blank=True, help_text='Snack name.')
+    name = models.CharField(unique=True, max_length=128, blank=True, help_text='Snack name.')
     url = models.CharField(max_length=500, blank=True, help_text='A url for buy the snack.')
     desc = models.TextField(blank=True, help_text='Snack description')
     image = models.ImageField(upload_to=snack_image_path)

@@ -192,9 +192,11 @@ GET /snacks/
 
 ### UIs
 
+- Order list
+  - order-list api
+  - update-order api
 - Snack list
   - snack-list api
-  - update-snack api
 - Order snack
   - create-order api
 
