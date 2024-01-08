@@ -1,0 +1,11 @@
+[tool.ruff]
+select = ['E', 'F', 'Q']
+ignore = ['W191', 'E111', 'E114', 'E117', 'D206', 'D300', 'Q000', 'Q001', 'Q002', 'Q003', 'COM812', 'COM819', 'ISC001', 'ISC002', 'F403']
+line-length = 120
+
+[tool.ruff.format]
+quote-style = 'single'
+preview = true
+
+[tool.ruff.pydocstyle]
+convention = 'google'

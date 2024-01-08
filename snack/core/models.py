@@ -3,4 +3,4 @@ from django.db import models
 
 
 class User(AbstractUser):
-    pass
+    is_deleted = models.BooleanField(default=False, help_text='Who leaved this project.')

@@ -57,6 +57,81 @@ DB_DIR=
 > make restart CONTAINER=snack-server
 ```
 
+# RESTAPI Convention
+
+RESTful 개념은 이미 논문 제시된 개념이며, 이를 해석하여 Convention 들이 제시되고 있다. 그 중 아래의 Best Practice 를 참고할까 한다. 
+
+REST API 의 Best Practice 는 프로젝트 마다 다양하게 변형될 수 있으며, 원 창안자가 제시한 개념을 단일 Best Practice 가 모두 담기도 어렵다. 
+
+- 활발하게 discussion 및 revise 가 이루어 지고 있으며
+- 반응이 비교적 좋은 Practice 라고 판단되는 아래 내용을 참조하려 한다.
+- [Lokesh Gupta's Convention](https://restfulapi.net/resource-naming/)
+- `Do not use trailing slash` 같은 rule 은 Django 에 적용할 수 없으니 무시한다.
+- 모든 API 는 Endpoint 까지만 정의하고 나머지는 drf-spectacular 의 문서를 활용한다.
+
+## Auth APIs
+
+### Get Access Token
+
+```text
+curl \
+  -X POST \
+  -H "Content-Type: application/json" \
+  -d '{"username": "davidattenborough", "password": "boatymcboatface"}' \
+  http://localhost:8000/auth/token/
+
+...
+{
+  "access":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX3BrIjoxLCJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiY29sZF9zdHVmZiI6IuKYgyIsImV4cCI6MTIzNDU2LCJqdGkiOiJmZDJmOWQ1ZTFhN2M0MmU4OTQ5MzVlMzYyYmNhOGJjYSJ9.NHlztMGER7UADHZJlxNG0WSi22a2KaYSfd1S-AuT7lU",
+  "refresh":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX3BrIjoxLCJ0b2tlbl90eXBlIjoicmVmcmVzaCIsImNvbGRfc3R1ZmYiOiLimIMiLCJleHAiOjIzNDU2NywianRpIjoiZGUxMmY0ZTY3MDY4NDI3ODg5ZjE1YWMyNzcwZGEwNTEifQ.aEoAYkSJjoWH1boshQAaTkf8G3yn0kapko6HFRt7Rh4"
+}
+```
+
+### Refresh Access Token
+
+```text
+curl \
+  -X POST \
+  -H "Content-Type: application/json" \
+  -d '{"refresh":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX3BrIjoxLCJ0b2tlbl90eXBlIjoicmVmcmVzaCIsImNvbGRfc3R1ZmYiOiLimIMiLCJleHAiOjIzNDU2NywianRpIjoiZGUxMmY0ZTY3MDY4NDI3ODg5ZjE1YWMyNzcwZGEwNTEifQ.aEoAYkSJjoWH1boshQAaTkf8G3yn0kapko6HFRt7Rh4"}' \
+  http://localhost:8000/auth/token/refresh/
+
+...
+{"access":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX3BrIjoxLCJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiY29sZF9zdHVmZiI6IuKYgyIsImV4cCI6MTIzNTY3LCJqdGkiOiJjNzE4ZTVkNjgzZWQ0NTQyYTU0NWJkM2VmMGI0ZGQ0ZSJ9.ekxRxgb9OKmHkfy-zs1Ro_xs1eMLXiR17dIDBVxeT-w"}
+```
+
+## Order APIs
+
+간식 주문 관련 APIs
+
+### GET 간식 주문 목록
+
+```text
+GET /orders/
+```
+
+### PUT 간식 주문 상태 업데이트
+
+```text
+GET /order/<str:order_uid>/
+```
+
+### POST 간식 주문
+
+```text
+POST /order/
+```
+
+## Snack APIs
+
+간식 관련 APIs
+
+### GET 간식 목록
+
+```text
+GET /snacks/
+```
+
 # Stack
 
 ## Backend
@@ -81,20 +156,73 @@ DB_DIR=
 
 ### requirements
 
-- 회원가입할 때 이메일(아이디), 비밀번호, 이름만 받습니다 .
+- 회원가입할 때 `이메일(아이디), 비밀번호, 이름` 만 받습니다 .
 - 회원은 일반 회원과 관리자로 나뉩니다.
 - 관리자가 회원을 관리하는 목록이 존재하고, 회원을 관리자로 변경이 가능합니다.
 - 회원 탈퇴가 가능하고, 가입할 때 탈퇴한 회원의 이메일로는 가입할 수 없습니다.
+
+### UIs 
+
+- Sign up 
+  - sign-up api
+- Sign in
+  - sign-in api
+- User list
+  - user-list api
+  - update-user api
+  - user-leave api
 
 ## Order App
 
 ### requirements
 
-- 이름, 이미지, 구매 URL, 설명을 입력할 수 있는 게시판을 만들어주세요.
-- 목록만봐도입력한모든것과상태를확인할수있으면좋겠습니다.
+- `이름, 이미지, 구매 URL, 설명` 을 입력할 수 있는 게시판을 만들어주세요.
+- 목록만 봐도 입력한 모든 것과 상태를 확인할 수 있으면 좋겠습니다.
 - 관리자가 신청 게시판에서 주문상태를 변경할 수 있습니다.
 - 주문상태를 변경할 때 몇 연월에 사용될 간식인지 지정할 수 있도록 해주세요
 - 주문된 간식은 월별로 볼 수 있도록 별도의 목록을 만들어주세요.
+- 한번 등록된 간식은 간식 모델로 저장되고 다음 간식신청때 `선택지에서 선택` 할 수 있다. (간식 요청 모델과 간식 모델의 관계 지정을 통한 구현 필요)
+- 주문 대기중 상태에서만 자신이 등록한 간식요청을 수정할 수 있습니다.
+- 아직 주문되지 않은 간식중, 신청된 간식이 있을 경우에 중복된 간식을 신청할 수 없다 제약을 줍니다.
+- 신청된 간식에 좋아요/싫어요를 선택 가능하다.
+- 좋아요/싫어요 비율에 따라 우선순위를 조정가능하다.
+- 싫어요가 좋아요보다 많으면, 간식신청의 주문상태를 주문완료로 바꿀 수 없다.
+
+> 간식을 구별하는 유일값은 간식의 이름이다.
+
+### UIs
+
+- Snack list
+  - snack-list api
+  - update-snack api
+- Order snack
+  - create-order api
+
+# Business Processes 
+
+본 프로젝트에서 사용되는 Business Processes 를 정의합니다.
+
+## 새로운 간식 주문
+
+```mermaid
+flowchart TD
+    A[로그인 페이지] --> |로그인 성공| B[간식 주문 테이블]
+    B[간식 주문 테이블] --> |간식 주문 버튼 클릭| C[주문서 작성 폼]
+    C[주문서 작성 폼] --> |주문서 작성 후 주문| D{간식 주문 프로세스 실행}
+    D{간식 주문 프로세스 실행} --> |주문 성공| B[간식 주문 테이블]
+    D{간식 주문 프로세스 실행} --> |주문 실패| C[주문서 작성 폼]
+```
+
+## 기존에 존재하는 간식 주문
+
+```mermaid
+flowchart TD
+  A[로그인 페이지] --> |로그인 성공| B[간식 주문 테이블]
+  B[간식 주문 테이블] --> |간식 주문 버튼 클릭| C[주문서 작성 폼]
+  C[주문서 작성 폼] --> |간식 목록에서 선택 후 주문| D{간식 주문 프로세스 실행}
+  D{간식 주문 프로세스 실행} --> |주문 성공| B[간식 주문 테이블]
+  D{간식 주문 프로세스 실행} --> |주문 실패| C[주문서 작성 폼]
+```
 
 # Model
 
@@ -103,8 +231,9 @@ DB_DIR=
 title: 간식창고 ERD
 ---
 erDiagram
-    USER ||--o{ ORDER : ordered
-    ORDER }o--|{ SNACK : contains
+    USER ||--o{ ORDER : places
+    ORDER ||--|{ CART: contains 
+    SNACK }|--|{ CART: include
 
     USER {
         int id PK
@@ -115,16 +244,22 @@ erDiagram
     ORDER {
         int id PK
         int user_id FK
+        int quantity
+    }
+    CART {
+        int id PK
+        int order_id FK
         int snack_id FK
         int quantity
     }
     SNACK {
         int id PK
-        int order(M2M)
         string name
         string url
+        text desc 
         file image
-        int price
+        enum currency
+        float price
     }
 ```
 
@@ -147,3 +282,12 @@ erDiagram
 ## order app
 
 - 간식 주문 관련 기능
+
+# TODOs
+
+- 요구사항에 근거해 API 설계
+- Permission 세팅
+- Serializer 구현
+- APIView 구현
+- drf-spectacular 이용해 APIView, Serializer 와 병합하여 SwaggerUI 페이지 서빙
+- djangorestframework-simplejwt 를 이용해 인증 API 구현

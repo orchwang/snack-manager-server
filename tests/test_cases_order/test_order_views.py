@@ -1,1 +1,12 @@
 import pytest
+from rest_framework.test import APIClient
+
+
+class TestRetrieveOrderView:
+    @pytest.mark.django_db
+    def test_retrieve_order_response_status_200(self, dummy_snacks_set_1, member_user_1):
+        client = APIClient()
+        client.force_authenticate(member_user_1)
+
+        response = client.get('/order/')
+        assert response.status_code == 200
