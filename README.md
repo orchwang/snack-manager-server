@@ -293,3 +293,4 @@ erDiagram
 - APIView 구현
 - drf-spectacular 이용해 APIView, Serializer 와 병합하여 SwaggerUI 페이지 서빙
 - djangorestframework-simplejwt 를 이용해 인증 API 구현
+- Level2 해당 기능 설계
