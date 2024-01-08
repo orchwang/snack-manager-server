@@ -53,3 +53,8 @@ test-workflow:
 
 test-tm:
 	docker exec -it $(CONTAINER) pytest -ra -k $(METHOD) --pdb
+
+# Poetry
+
+requirements-dev-to-poetry:
+    poetry add --dev --lock -D --allow-prereleases --from=requirements-dev.txt
