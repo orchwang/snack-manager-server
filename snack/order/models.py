@@ -26,7 +26,7 @@ class Snack(models.Model):
 class Order(models.Model):
     uid = ShortUUIDField(unique=True, editable=False, db_index=True)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    snacks_cart = models.ManyToManyField(
+    carts = models.ManyToManyField(
         Snack,
         through='Cart',
         through_fields=('order', 'snack'),
