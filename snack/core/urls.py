@@ -5,11 +5,12 @@ from rest_framework_simplejwt.views import (
     TokenRefreshView,
 )
 
-from snack.core.views.auth_views import IsAdminCheckView, UserSignUpView
+from snack.core.views.auth_views import IsAdminCheckView, AuthenticationCheckView, UserSignUpView
 
 
 urlpatterns = [
     path('checks/is_admin/', IsAdminCheckView.as_view()),
+    path('checks/is_authenticated/', AuthenticationCheckView.as_view()),
 ]
 
 urlpatterns += [

@@ -84,6 +84,14 @@ class TestTokenAuthViews:
 
         client.credentials(HTTP_AUTHORIZATION='Bearer ' + access_token)
 
-        response = client.get('/orders/')
+        response = client.get('/checks/is_authenticated/')
         assert response.status_code == 200
-        assert len(response.json()) == len(dummy_orders_set_1)
+
+    @pytest.mark.django_db
+    def test_with_invalid_access_token_authentication_success(self, dummy_orders_set_1, member_user_1):
+        client = APIClient()
+
+        client.credentials(HTTP_AUTHORIZATION='Bearer ' + 'fakeaccesstoken')
+
+        response = client.get('/checks/is_authenticated/')
+        assert response.status_code == 401
