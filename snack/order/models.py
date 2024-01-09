@@ -5,7 +5,7 @@ from django.conf import settings
 from django.db import models
 from shortuuid.django_fields import ShortUUIDField
 
-from snack.order.constants import Currency
+from snack.order.constants import Currency, OrderStatus
 
 
 def snack_image_path(instance, filename):
@@ -26,6 +26,7 @@ class Snack(models.Model):
 class Order(models.Model):
     uid = ShortUUIDField(unique=True, editable=False, db_index=True)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    status = models.CharField(max_length=20, choices=OrderStatus.choices, default=OrderStatus.CREATED)
     carts = models.ManyToManyField(
         Snack,
         through='Cart',
