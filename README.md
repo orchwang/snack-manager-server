@@ -186,13 +186,8 @@ Permission 구성 요소는 아래와 같습니다. 등급 별 권한이 상이�
 ### UIs 
 
 - Sign up 
-  - sign-up api
 - Sign in
-  - sign-in api
 - User list
-  - user-list api
-  - update-user api
-  - user-leave api
 
 ## Order App
 
@@ -215,38 +210,74 @@ Permission 구성 요소는 아래와 같습니다. 등급 별 권한이 상이�
 ### UIs
 
 - Order list
-  - order-list api
-  - update-order api
 - Snack list
-  - snack-list api
 - Order snack
-  - create-order api
 
 # Business Processes 
 
 본 프로젝트에서 사용되는 Business Processes 를 정의합니다.
 
+## 페이지 목록
+
+- 회원 가입 페이지
+- 로그인 페이지
+- 간식 목록 페이지
+  - 관리자는 간식 상태 변경
+- 통계 페이지
+
+## 모달 목록
+
+- 간식 주문 모달
+- 주문 상태 변경 모달
+
 ## 새로운 간식 주문
 
 ```mermaid
 flowchart TD
-    A[로그인 페이지] --> |로그인 성공| B[간식 주문 테이블]
-    B[간식 주문 테이블] --> |간식 주문 버튼 클릭| C[주문서 작성 폼]
-    C[주문서 작성 폼] --> |주문서 작성 후 주문| D{간식 주문 프로세스 실행}
-    D{간식 주문 프로세스 실행} --> |주문 성공| B[간식 주문 테이블]
-    D{간식 주문 프로세스 실행} --> |주문 실패| C[주문서 작성 폼]
+    signup[회원 가입 페이지]
+    login[로그인 페이지]
+    orderlist[간식 주문 목록 페이지]
+    order[간식 신청 페이지]
+    
+    orderprocess{간식 주문 프로세스 실행}
+    
+    signup --> |가입 성공| login
+    login --> |로그인 성공| orderlist
+    orderlist --> |간식 주문 버튼 클릭| order
+    order --> |원하는 간식이 목록에 없어 신규 작성| orderprocess
+    orderprocess --> |주문 성공| orderlist
+    orderprocess --> |주문 실패| order
 ```
 
 ## 기존에 존재하는 간식 주문
 
 ```mermaid
 flowchart TD
-  A[로그인 페이지] --> |로그인 성공| B[간식 주문 테이블]
-  B[간식 주문 테이블] --> |간식 주문 버튼 클릭| C[주문서 작성 폼]
-  C[주문서 작성 폼] --> |간식 목록에서 선택 후 주문| D{간식 주문 프로세스 실행}
-  D{간식 주문 프로세스 실행} --> |주문 성공| B[간식 주문 테이블]
-  D{간식 주문 프로세스 실행} --> |주문 실패| C[주문서 작성 폼]
+  signup[회원 가입 페이지]
+  login[로그인 페이지]
+  orderlist[간식 주문 목록 페이지]
+  order[간식 신청 페이지]
+
+  orderprocess{간식 주문 프로세스 실행}
+
+  signup --> |가입 성공| login
+  login --> |로그인 성공| orderlist
+  orderlist --> |간식 주문 버튼 클릭| order
+  order --> |원하는 간식 선택| orderprocess
+  orderprocess --> |주문 성공| orderlist
+  orderprocess --> |주문 실패| order
 ```
+
+## 필요한 API 목록
+
+- 회원 가입
+- JWT 발급 (로그인)
+- JWT 리프레시
+- 주문 목록
+- 주문 상태 변경
+- 등록된 간식 목록
+- 간식 주문 작성
+- 월별 주문량 통계
 
 ## Order Status Flow
 
@@ -276,6 +307,8 @@ flowchart TD
 ```
 
 # Model
+
+아래의 ERD 는 초기 설계용 이며, 개발이 진행되면서 추가 혹은 삭제되는 요소가 있을 수 있습니다.
 
 ```mermaid
 ---
