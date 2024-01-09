@@ -1,13 +1,13 @@
 from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
 
-from snack.order.serializers.order_serializers import CartSerializer, OrderSerializer
-from snack.order.models import Cart, Order
+from snack.order.serializers.order_serializers import OrderSerializer
+from snack.order.models import Order
 
 
 class CartListView(generics.ListAPIView):
-    queryset = Cart.objects.all()
-    serializer_class = CartSerializer
+    queryset = Order.objects.all()
+    serializer_class = OrderSerializer
     permission_classes = [IsAuthenticated]
 
 
