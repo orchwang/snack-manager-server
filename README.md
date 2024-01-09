@@ -132,6 +132,28 @@ POST /order/
 GET /snacks/
 ```
 
+# Permission
+
+시스템 사용자의 권한을 설정하고 역할 별 제한사항을 설정합니다.
+
+## 구성요소
+
+Permission 구성 요소는 아래와 같습니다. 등급 별 권한이 상이합니다.
+
+- 일반회원 (member)
+- 관리자 (admin)
+
+## member permissions
+
+- 선택 가능한 간식 목록 조회
+- 주문 목록 조회
+- 간식 주문
+
+## manager permissions
+
+- member 의 모든 권한
+- 주문 상태 변경
+
 # Stack
 
 ## Backend
@@ -179,7 +201,7 @@ GET /snacks/
 - `이름, 이미지, 구매 URL, 설명` 을 입력할 수 있는 게시판
 - 목록만 에서 모든 필드와 상태 확인 가능
 - 관리자는 게시판에서 주문상태 변경
-- 주문상태 변경할 시 예상 사용 일시 입력해야 함
+- 주문상태 변경할 시 예상 사용 일시 입력해야 함 (어떤 예상 사용 일시? 실제 소비할 수 있는 날자?)
 - 월별 별도 목록 필요
 - 한번 등록된 간식은 추후 선택 가능 (간식 요청 모델과 간식 모델의 관계 지정을 통한 구현 필요)
 - 대기중 일 때만 수정 가능
@@ -224,6 +246,33 @@ flowchart TD
   C[주문서 작성 폼] --> |간식 목록에서 선택 후 주문| D{간식 주문 프로세스 실행}
   D{간식 주문 프로세스 실행} --> |주문 성공| B[간식 주문 테이블]
   D{간식 주문 프로세스 실행} --> |주문 실패| C[주문서 작성 폼]
+```
+
+## Order Status Flow
+
+주문 상태의 구성과 플로우는 아래와 같다.
+
+- created:생성됨
+- ordered:주문 완료
+- canceled:취소됨
+- approved:승인됨
+- shipping:배송중
+- completed:완료
+
+```mermaid
+flowchart TD
+  created[created]
+  ordered[ordered]
+  canceled[canceled]
+  approved[approved]
+  shipping[shipping]
+  completed[completed]
+  
+  created --> |주문 작성 완료 및 주문| ordered
+  ordered --> |간식 승인| approved
+  approved --> |배송 시작 처리, 예상 도착 일시 입력| shipping
+  shipping--> |간식 배송 완료| completed
+  ordered--> |주문 취소| canceled
 ```
 
 # Model
