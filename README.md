@@ -69,7 +69,11 @@ REST API 의 Best Practice 는 프로젝트 마다 다양하게 변형될 수 �
 - `Do not use trailing slash` 같은 rule 은 Django 에 적용할 수 없으니 무시한다.
 - 모든 API 는 Endpoint 까지만 정의하고 나머지는 drf-spectacular 의 문서를 활용한다.
 
-## Auth APIs
+## allauth
+
+[`django-allauth`](https://docs.allauth.org/en/latest/installation/quickstart.html) package 를 활용하여 인증 기능을 구현한다.
+
+## Simple JWT
 
 ### Get Access Token
 

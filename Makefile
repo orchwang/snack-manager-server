@@ -22,24 +22,23 @@ logs:
 	docker compose -f docker-compose.$(TARGET).yml --env-file .env.docker-compose logs -f $(CONTAINER)
 
 django-shell:
-	docker exec -it $(CONTAINER) python manage.py shell --settings=$(PROJECT_NAME).settings.dev
+	docker exec -it $(CONTAINER) poetry run python manage.py shell --settings=$(PROJECT_NAME).settings.dev
 
 bash:
 	docker exec -it $(CONTAINER) /bin/bash
-
-# PIP Commands
-
-pip-compile:
-	docker exec -it $(CONTAINER) pip-compile
 
 
 # Django Commands
 
 makemigrations:
-	docker exec -it $(CONTAINER) python manage.py makemigrations --settings=$(PROJECT_NAME).settings.dev
+	docker exec -it $(CONTAINER) poetry run python manage.py makemigrations --settings=$(PROJECT_NAME).settings.dev
 
 migrate:
-	docker exec -it $(CONTAINER) python manage.py migrate --settings=$(PROJECT_NAME).settings.dev
+	docker exec -it $(CONTAINER) poetry run python manage.py migrate --settings=$(PROJECT_NAME).settings.dev
+
+fake-migrate:
+	docker exec -it $(CONTAINER) poetry run python manage.py migrate --fake --settings=$(PROJECT_NAME).settings.dev
+
 
 # Test
 
