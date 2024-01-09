@@ -10,6 +10,7 @@ class TestGetOrderListView:
 
         response = client.get('/orders/')
         assert response.status_code == 200
+        assert len(response.json()) == len(dummy_orders_set_1)
 
 
 class TestRetrieveOrderView:
@@ -19,4 +20,14 @@ class TestRetrieveOrderView:
         client.force_authenticate(member_user_1)
 
         response = client.get('/order/')
+        assert response.status_code == 200
+
+
+class TestGetSnackListView:
+    @pytest.mark.django_db
+    def test_get_snack_list_response_status_200(self, dummy_orders_set_1, member_user_1):
+        client = APIClient()
+        client.force_authenticate(member_user_1)
+
+        response = client.get('/snacks/')
         assert response.status_code == 200

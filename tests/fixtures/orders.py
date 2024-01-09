@@ -28,6 +28,7 @@ def dummy_snacks_set_1():
                 name=snack_data.get('name'),
                 url=snack_data.get('url'),
                 image=upload_image,
+                desc=snack_data.get('desc'),
                 price=snack_data.get('price'),
                 currency=Currency(snack_data.get('currency')),
             )
