@@ -66,3 +66,24 @@ class TestTokenAuthViews:
 
         response_json = response.json()
         assert response_json['detail'] == 'No active account found with the given credentials'
+
+    @pytest.mark.django_db
+    def test_with_access_token_authentication_success(self, dummy_orders_set_1, member_user_1):
+        client = APIClient()
+
+        payload = {'username': member_user_1.username, 'password': 'password'}
+
+        response = client.post('/auth/token/', data=payload)
+        assert response.status_code == 200
+
+        response_json = response.json()
+        assert response_json['access']
+        assert response_json['refresh']
+
+        access_token = response_json['access']
+
+        client.credentials(HTTP_AUTHORIZATION='Bearer ' + access_token)
+
+        response = client.get('/orders/')
+        assert response.status_code == 200
+        assert len(response.json()) == len(dummy_orders_set_1)
