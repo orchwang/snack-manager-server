@@ -52,3 +52,7 @@ test-workflow:
 
 test-tm:
 	docker exec -it $(CONTAINER) pytest -ra -k $(METHOD) --pdb
+
+remove-test-statics:
+	rm -rf tests/images
+	rm -rf tests/test_cases_auth/images
