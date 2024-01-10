@@ -5,7 +5,7 @@ from django.conf import settings
 from django.db import models
 from shortuuid.django_fields import ShortUUIDField
 
-from snack.order.constants import Currency, OrderStatus
+from snack.order.constants import Currency, OrderStatus, SnackReactionType
 
 
 def snack_image_path(instance, filename):
@@ -23,6 +23,11 @@ class Snack(models.Model):
     price = models.FloatField()
 
 
+class SnackReaction(models.Model):
+    snack = models.ForeignKey(Snack, on_delete=models.CASCADE, to_field='uid', related_name='snack_reactions')
+    type = models.CharField(max_length=10, choices=SnackReactionType.choices, default=SnackReactionType.LIKE)
+
+
 class Order(models.Model):
     uid = ShortUUIDField(unique=True, editable=False, db_index=True)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
@@ -37,4 +42,4 @@ class Order(models.Model):
 class Cart(models.Model):
     quantity = models.IntegerField()
     order = models.ForeignKey(Order, on_delete=models.CASCADE)
-    snack = models.ForeignKey(Snack, on_delete=models.CASCADE)
+    snack = models.ForeignKey(Snack, on_delete=models.CASCADE, to_field='name')

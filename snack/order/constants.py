@@ -10,6 +10,11 @@ class OrderStatus(models.TextChoices):
     COMPLETED = 'COMPLETED'
 
 
+class SnackReactionType(models.TextChoices):
+    LIKE = 'LIKE'
+    HATE = 'HATE'
+
+
 class Currency(models.TextChoices):
     KRW = 'KRW'
     USD = 'USD'
