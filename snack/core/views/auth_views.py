@@ -9,7 +9,11 @@ from django.contrib.auth import get_user_model
 from drf_spectacular.utils import extend_schema
 
 from snack.core.permissions import IsAdmin
-from snack.core.serializers.user_serializers import CreateUserSerializer, UserProfileSerializer
+from snack.core.serializers.user_serializers import (
+    CreateUserSerializer,
+    UserProfileSerializer,
+)
+from snack.core.serializers.general_serializers import ResponseDetailSerializer
 
 User = get_user_model()
 
@@ -35,7 +39,10 @@ class UserSignUpView(generics.CreateAPIView):
 
 @extend_schema(
     description='특정 사용자의 상세 정보를 가져옵니다.',
-    responses={200: UserProfileSerializer},
+    responses={
+        200: UserProfileSerializer,
+        400: ResponseDetailSerializer,
+    },
 )
 class UserProfileView(APIView):
     permission_classes = [IsAuthenticated]
