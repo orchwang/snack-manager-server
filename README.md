@@ -264,7 +264,7 @@ flowchart TD
     orderlist --> |등록된 간식 목록 조회| snacklist
     snacklist --> |주문 목록 조회| orderlist
     snacklist --> |신규 간식 등록|registersnack
-    registersnack --> registerprocess
+    registersnack --> |간식 정보 submit|registerprocess
     registerprocess --> |등록 성공| snacklist
     registerprocess --> |등록 실패| registersnack
 ```
@@ -295,9 +295,10 @@ flowchart TD
 - JWT 발급 (로그인)
 - JWT 리프레시
 - 주문 목록
+- 주문 상세
 - 주문 상태 변경
 - 등록된 간식 목록
-- 간식 주문 작성
+- 간식 작성
 - 월별 주문량 통계
 
 ## Order Status Flow
