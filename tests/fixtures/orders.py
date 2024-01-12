@@ -6,7 +6,7 @@ from django.core.files import File
 from django.core.files.uploadedfile import SimpleUploadedFile
 
 from snack.order.constants import Currency
-from snack.order.models import Snack, Order, Cart
+from snack.order.models import Snack, Order, Purchase
 
 
 @pytest.fixture
@@ -14,7 +14,7 @@ def dummy_snacks_set_1():
     snacks_json_path = f'{settings.TEST_DIR}/fixtures/snacks_raw_data/snacks.json'
     with open(snacks_json_path, 'r') as json_file:
         snacks_data = json.load(json_file)
-    cart_list = []
+    snack_list = []
     for snack_data in snacks_data:
         image = File(
             open(
@@ -23,7 +23,7 @@ def dummy_snacks_set_1():
             )
         )
         upload_image = SimpleUploadedFile(snack_data.get('image'), image.read(), content_type='multipart/form-data')
-        cart_list.append(
+        snack_list.append(
             Snack(
                 name=snack_data.get('name'),
                 url=snack_data.get('url'),
@@ -33,7 +33,7 @@ def dummy_snacks_set_1():
                 currency=Currency(snack_data.get('currency')),
             )
         )
-    return Snack.objects.bulk_create(cart_list)
+    return Snack.objects.bulk_create(snack_list)
 
 
 @pytest.fixture
@@ -48,12 +48,12 @@ def dummy_orders_set_1(dummy_snacks_set_1, member_user_1, member_user_2, member_
 
     orders = Order.objects.bulk_create(order_list)
 
-    cart_list = []
-    cart_list.append(Cart(order=orders[0], snack=dummy_snacks_set_1[0], quantity=1))
-    cart_list.append(Cart(order=orders[1], snack=dummy_snacks_set_1[1], quantity=4))
-    cart_list.append(Cart(order=orders[2], snack=dummy_snacks_set_1[2], quantity=20))
-    cart_list.append(Cart(order=orders[3], snack=dummy_snacks_set_1[3], quantity=50))
-    cart_list.append(Cart(order=orders[4], snack=dummy_snacks_set_1[4], quantity=15))
-    Cart.objects.bulk_create(cart_list)
+    purchase_list = []
+    purchase_list.append(Purchase(order=orders[0], snack=dummy_snacks_set_1[0], quantity=1))
+    purchase_list.append(Purchase(order=orders[1], snack=dummy_snacks_set_1[1], quantity=4))
+    purchase_list.append(Purchase(order=orders[2], snack=dummy_snacks_set_1[2], quantity=20))
+    purchase_list.append(Purchase(order=orders[3], snack=dummy_snacks_set_1[3], quantity=50))
+    purchase_list.append(Purchase(order=orders[4], snack=dummy_snacks_set_1[4], quantity=15))
+    Purchase.objects.bulk_create(purchase_list)
 
     return orders

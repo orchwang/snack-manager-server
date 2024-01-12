@@ -22,6 +22,9 @@ class Snack(models.Model):
     currency = models.CharField(max_length=4, choices=Currency.choices, default=Currency.KRW)
     price = models.FloatField()
 
+    def __str__(self):
+        return self.name
+
 
 class SnackReaction(models.Model):
     snack = models.ForeignKey(Snack, on_delete=models.CASCADE, to_field='uid', related_name='snack_reactions')
@@ -32,14 +35,17 @@ class Order(models.Model):
     uid = ShortUUIDField(unique=True, editable=False, db_index=True)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     status = models.CharField(max_length=20, choices=OrderStatus.choices, default=OrderStatus.CREATED)
-    carts = models.ManyToManyField(
+    purchases = models.ManyToManyField(
         Snack,
-        through='Cart',
+        through='Purchase',
         through_fields=('order', 'snack'),
     )
 
+    def __str__(self):
+        return f'{self.uid}'
 
-class Cart(models.Model):
+
+class Purchase(models.Model):
     quantity = models.IntegerField()
     order = models.ForeignKey(Order, on_delete=models.CASCADE)
     snack = models.ForeignKey(Snack, on_delete=models.CASCADE, to_field='name')

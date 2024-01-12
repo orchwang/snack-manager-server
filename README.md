@@ -312,8 +312,8 @@ title: 간식창고 ERD
 ---
 erDiagram
     USER ||--o{ ORDER : places
-    ORDER ||--|{ CART: contains 
-    SNACK }|--|{ CART: include
+    ORDER ||--|{ PURCHASE: contains 
+    SNACK }|--|{ PURCHASE: include
 
     USER {
         int id PK
@@ -324,9 +324,8 @@ erDiagram
     ORDER {
         int id PK
         int user_id FK
-        int quantity
     }
-    CART {
+    PURCHASE {
         int id PK
         int order_id FK
         int snack_id FK

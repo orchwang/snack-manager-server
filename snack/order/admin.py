@@ -1,14 +1,14 @@
 from django.contrib import admin
 
-from snack.order.models import Cart, Order, Snack
+from snack.order.models import Purchase, Order, Snack
 
 
-class CartInline(admin.TabularInline):
-    model = Cart
+class PurchaseInline(admin.TabularInline):
+    model = Purchase
 
 
 class OrderAdmin(admin.ModelAdmin):
-    inlines = [CartInline]
+    inlines = [PurchaseInline]
 
 
 class SnackAdmin(admin.ModelAdmin):

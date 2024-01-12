@@ -1,14 +1,14 @@
 import pytest
 
-from snack.order.serializers.order_serializers import CartSerializer, OrderSerializer
-from snack.order.models import Cart, Order
+from snack.order.serializers.order_serializers import PurchaseSerializer, OrderSerializer
+from snack.order.models import Purchase, Order
 
 
-class TestCartSerializers:
+class TestPurchaseSerializers:
     @pytest.mark.django_db
-    def test_cart_serializers_return_data(self, dummy_orders_set_1):
-        cart = Cart.objects.filter(order=dummy_orders_set_1[0]).all()
-        serializer = CartSerializer(cart, many=True)
+    def test_puchase_serializers_return_data(self, dummy_orders_set_1):
+        purchases = Purchase.objects.filter(order=dummy_orders_set_1[0]).all()
+        serializer = PurchaseSerializer(purchases, many=True)
 
         for item in serializer.data:
             assert item.get('quantity') == 1

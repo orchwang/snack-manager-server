@@ -7,9 +7,9 @@ from snack.core.serializers.user_serializers import UserProfileSerializer
 User = get_user_model()
 
 
-class TestCartSerializers:
+class TestUserProfileSerializer:
     @pytest.mark.django_db
-    def test_cart_serializers_return_data(self, member_user_1):
+    def test_user_profile_serializers_return_data(self, member_user_1):
         serializer = UserProfileSerializer(member_user_1)
         user_data = serializer.data
 
