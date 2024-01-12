@@ -232,32 +232,60 @@ Permission 구성 요소는 아래와 같습니다. 등급 별 권한이 상이�
 
 ## Business Process Flow
 
+### Authentication Flow
+
 ```mermaid
 ---
 title: 프로젝트 Business Process Flow
 ---
 flowchart TD
-    signup[회원 가입 페이지]
-    login[로그인 페이지]
-    orderlist[간식 주문 목록 페이지]
-    ordersnack[간식 주문 페이지 or 모달]
+  signup[회원 가입 페이지]
+  login[로그인 페이지]
+  orderlist[주문 목록 페이지]
+
+  signup --> |가입 성공| login
+  signup --> |가입 실패| signup
+  login --> |로그인 성공| orderlist
+  orderlist --> |로그아웃 성공| login
+```
+
+### Snack Management Flow
+
+```mermaid
+---
+title: 프로젝트 Business Process Flow
+---
+flowchart TD
+    orderlist[주문 목록 페이지]
+    snacklist[간식 목록 페이지]
     registersnack[간식 등록 페이지 or 모달]
-    
-    orderprocess{간식 주문 프로세스 실행}
     registerprocess{간식 등록 프로세스 실행}
     
-    signup --> |가입 성공| login
-    signup --> |가입 실패| signup
-    login --> |로그인 성공| orderlist
-    orderlist --> |로그아웃 성공| login
-    
-    orderlist --> registersnack
+    orderlist --> |등록된 간식 목록 조회| snacklist
+    snacklist --> |주문 목록 조회| orderlist
+    snacklist --> |신규 간식 등록|registersnack
     registersnack --> registerprocess
-    registerprocess --> |등록 성공| orderlist
-    registerprocess --> |등록 실패| registerprocess
+    registerprocess --> |등록 성공| snacklist
+    registerprocess --> |등록 실패| registersnack
+```
+
+### Order Management Flow
+
+```mermaid
+---
+title: 프로젝트 Business Process Flow
+---
+flowchart TD
+    orderlist[주문 목록 페이지]
+    orderdetail[주문 상세 페이지]
+    ordersnack[간식 주문 페이지 or 모달]
+    orderprocess{간식 주문 프로세스 실행}
+    
+    orderlist --> |특정 주문 상세정보 확인| orderdetail
+    orderdetail --> |주문 목록 조회| orderlist
     orderlist --> |간식 주문 버튼 클릭| ordersnack
     ordersnack --> |원하는 간식 및 수량 등을 선택 후 주문| orderprocess
-    orderprocess --> |주문 성공| orderlist
+    orderprocess --> |주문 성공| orderdetail
     orderprocess --> |주문 실패| ordersnack
 ```
 
