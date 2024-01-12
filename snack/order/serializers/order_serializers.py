@@ -5,8 +5,6 @@ from snack.order.serializers.snack_serializers import SnackSerializer
 
 
 class OrderSerializer(serializers.ModelSerializer):
-    carts = SnackSerializer(many=True)
-
     class Meta:
         model = Order
         fields = '__all__'

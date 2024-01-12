@@ -3,14 +3,20 @@ from rest_framework.permissions import IsAuthenticated
 
 from drf_spectacular.utils import extend_schema
 
-from snack.order.serializers.order_serializers import OrderSerializer
-from snack.order.models import Order
+from snack.order.serializers.order_serializers import OrderSerializer, CartSerializer
+from snack.order.models import Order, Cart
 
 
 @extend_schema(description='간식 주문 목록을 불러옵니다.')
-class CartListView(generics.ListAPIView):
+class OrderListView(generics.ListAPIView):
     queryset = Order.objects.all()
     serializer_class = OrderSerializer
+    permission_classes = [IsAuthenticated]
+
+
+class CartListView(generics.ListAPIView):
+    queryset = Cart.objects.all()
+    serializer_class = CartSerializer
     permission_classes = [IsAuthenticated]
 
 

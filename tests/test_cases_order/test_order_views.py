@@ -2,7 +2,7 @@ import pytest
 from rest_framework.test import APIClient
 
 
-class TestGetCartListView:
+class TestGetOrderListView:
     @pytest.mark.django_db
     def test_get_order_list_response_status_200(self, dummy_orders_set_1, member_user_1):
         client = APIClient()
@@ -11,6 +11,19 @@ class TestGetCartListView:
         response = client.get('/orders/')
         assert response.status_code == 200
         assert len(response.json()) == len(dummy_orders_set_1)
+
+
+class TestGetCartListView:
+    @pytest.mark.django_db
+    def test_get_cart_list_response_status_200(self, dummy_orders_set_1, member_user_1):
+        client = APIClient()
+        client.force_authenticate(member_user_1)
+
+        response = client.get('/carts/')
+        assert response.status_code == 200
+
+        result = response.json()
+        assert len(result) == len(dummy_orders_set_1)
 
 
 class TestRetrieveCartView:
