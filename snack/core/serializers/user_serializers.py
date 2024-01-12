@@ -4,6 +4,7 @@ from snack.core.models import User
 from snack.core.exceptions import InvalidEmail
 
 
+# TODO: ConfirmationPassword 도 받아서 검증해야 함
 class CreateUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
