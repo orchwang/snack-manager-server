@@ -29,6 +29,27 @@ class TestUserSignUpView:
         assert response.status_code == 400
 
 
+class TestUserProfileView:
+    @pytest.mark.django_db
+    def test_user_profile_response_valid_user_profile_data(self, member_user_1):
+        client = APIClient()
+        client.force_authenticate(member_user_1)
+
+        response = client.get('/auth/user/profile/')
+        assert response.status_code == 200
+
+        response_json = response.json()
+        assert response_json['username'] == member_user_1.username
+        assert response_json['email'] == member_user_1.email
+
+    @pytest.mark.django_db
+    def test_user_profile_without_authentication_response_401(self, member_user_1):
+        client = APIClient()
+
+        response = client.get('/auth/user/profile/')
+        assert response.status_code == 401
+
+
 class TestTokenAuthViews:
     @pytest.mark.django_db
     def test_with_username_and_password_get_token_success(self, member_user_1):
