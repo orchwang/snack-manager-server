@@ -35,7 +35,7 @@ class Order(models.Model):
     uid = ShortUUIDField(unique=True, editable=False, db_index=True)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     status = models.CharField(max_length=20, choices=OrderStatus.choices, default=OrderStatus.CREATED)
-    purchases = models.ManyToManyField(
+    snacks = models.ManyToManyField(
         Snack,
         through='Purchase',
         through_fields=('order', 'snack'),

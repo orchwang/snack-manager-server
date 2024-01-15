@@ -1,6 +1,6 @@
 import pytest
 
-from snack.order.serializers.order_serializers import PurchaseSerializer, OrderSerializer
+from snack.order.serializers.order_serializers import PurchaseSerializer, OrderSerializer, OrderDetailSerializer
 from snack.order.models import Purchase, Order
 
 
@@ -30,3 +30,19 @@ class TestOrderSerializers:
         for item in serializer.data:
             order = Order.objects.get(uid=item['uid'])
             assert item.get('uid') == order.uid
+
+
+class TestOrderDetailSerializers:
+    @pytest.mark.django_db
+    def test_order_detail_serializers_return_order_data_with_related_snack_list(
+        self, dummy_orders_set_1, dummy_snacks_set_1
+    ):
+        prefetched_queryset = Order.objects.prefetch_related('snacks')
+        serializer = OrderDetailSerializer(prefetched_queryset, many=True)
+
+        data = serializer.data
+        assert len(data) == len(dummy_orders_set_1)
+        for item in data:
+            order = Order.objects.get(uid=item['uid'])
+            assert item.get('uid') == order.uid
+            assert item.get('snacks')

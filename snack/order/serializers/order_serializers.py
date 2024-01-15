@@ -6,16 +6,10 @@ from snack.order.serializers.snack_serializers import SnackSerializer
 
 
 class OrderSerializer(serializers.Serializer):
-    uid = serializers.CharField()
-    status = serializers.ChoiceField(choices=OrderStatus.choices)
-    user_id = serializers.IntegerField()
-    user_email = serializers.SerializerMethodField()
+    """
+    Order + Snack queryset
+    """
 
-    def get_user_email(self, obj):
-        return obj.user.email
-
-
-class OrderDetailSerializer(serializers.Serializer):
     uid = serializers.CharField()
     status = serializers.ChoiceField(choices=OrderStatus.choices)
     user_id = serializers.IntegerField()
@@ -32,3 +26,14 @@ class PurchaseSerializer(serializers.ModelSerializer):
     class Meta:
         model = Purchase
         fields = '__all__'
+
+
+class OrderDetailSerializer(serializers.Serializer):
+    uid = serializers.CharField()
+    status = serializers.ChoiceField(choices=OrderStatus.choices)
+    user_id = serializers.IntegerField()
+    user_email = serializers.SerializerMethodField()
+    snacks = SnackSerializer(many=True)
+
+    def get_user_email(self, obj):
+        return obj.user.email

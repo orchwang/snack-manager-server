@@ -1,6 +1,8 @@
 import pytest
 from rest_framework.test import APIClient
 
+from snack.order.models import Purchase
+
 
 class TestGetOrderListView:
     @pytest.mark.django_db
@@ -22,8 +24,10 @@ class TestGetPurchaseListView:
         response = client.get('/purchases/')
         assert response.status_code == 200
 
+        purchases = Purchase.objects.all()
+
         result = response.json()
-        assert len(result) == len(dummy_orders_set_1)
+        assert len(result) == purchases.count()
 
 
 class TestRetrieveOrderView:
