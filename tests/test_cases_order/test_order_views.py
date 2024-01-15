@@ -44,6 +44,13 @@ class TestRetrieveOrderView:
         assert response_json['user_id'] == dummy_orders_set_1[0].user.id
         assert response_json['user_email'] == dummy_orders_set_1[0].user.email
 
+        purchases = Purchase.objects.filter(order=dummy_orders_set_1[0].id).all()
+        assert len(response_json['snacks']) == purchases.count()
+        for i in range(len(response_json['snacks'])):
+            assert purchases[i].snack.id == response_json['snacks'][i]['id']
+            assert purchases[i].snack.uid == response_json['snacks'][i]['uid']
+            assert purchases[i].snack.name == response_json['snacks'][i]['name']
+
 
 class TestGetSnackListView:
     @pytest.mark.django_db
