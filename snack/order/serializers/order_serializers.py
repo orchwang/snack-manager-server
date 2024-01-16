@@ -28,6 +28,8 @@ class OrderDetailSerializer(serializers.Serializer):
     user_id = serializers.IntegerField()
     status = serializers.ChoiceField(choices=OrderStatus.choices)
     user_email = serializers.SerializerMethodField()
+    created_at = serializers.DateTimeField()
+    updated_at = serializers.DateTimeField()
     purchase_set = PurchaseSerializer(many=True, read_only=True)
 
     def get_user_email(self, obj):
