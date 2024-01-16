@@ -21,6 +21,8 @@ class Snack(models.Model):
     image = models.ImageField(upload_to=snack_image_path)
     currency = models.CharField(max_length=4, choices=Currency.choices, default=Currency.KRW)
     price = models.FloatField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         indexes = [
@@ -34,6 +36,8 @@ class Snack(models.Model):
 class SnackReaction(models.Model):
     snack = models.ForeignKey(Snack, on_delete=models.CASCADE, to_field='uid', related_name='snack_reactions')
     type = models.CharField(max_length=10, choices=SnackReactionType.choices, default=SnackReactionType.LIKE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
 
 class Order(models.Model):
@@ -45,6 +49,8 @@ class Order(models.Model):
         related_name='snacks',
         through='Purchase',
     )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         indexes = [
@@ -59,3 +65,5 @@ class Purchase(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE)
     snack = models.ForeignKey(Snack, on_delete=models.CASCADE)
     quantity = models.IntegerField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)

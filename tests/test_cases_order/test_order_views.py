@@ -45,11 +45,11 @@ class TestRetrieveOrderView:
         assert response_json['user_email'] == dummy_orders_set_1[0].user.email
 
         purchases = Purchase.objects.filter(order=dummy_orders_set_1[0].id).all()
-        assert len(response_json['snacks']) == purchases.count()
-        for i in range(len(response_json['snacks'])):
-            assert purchases[i].snack.id == response_json['snacks'][i]['id']
-            assert purchases[i].snack.uid == response_json['snacks'][i]['uid']
-            assert purchases[i].snack.name == response_json['snacks'][i]['name']
+        assert len(response_json['purchase_set']) == purchases.count()
+        for i in range(len(response_json['purchase_set'])):
+            assert purchases[i].snack.id == response_json['purchase_set'][i]['snack']['id']
+            assert purchases[i].snack.uid == response_json['purchase_set'][i]['snack']['uid']
+            assert purchases[i].snack.name == response_json['purchase_set'][i]['snack']['name']
 
 
 class TestGetSnackListView:

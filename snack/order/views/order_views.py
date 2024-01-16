@@ -23,7 +23,7 @@ class PurchaseListView(generics.ListAPIView):
 
 @extend_schema(description='특정 간식 주문의 상세 내역을 불러옵니다. 주문 데이터 개요와 선택한 간식 목록이 포함됩니다.')
 class RetrieveOrderView(generics.RetrieveAPIView):
-    queryset = Order.objects.prefetch_related('snacks').all()
+    queryset = Order.objects.prefetch_related('purchase_set__snack').all()
     serializer_class = OrderDetailSerializer
     permission_classes = [IsAuthenticated]
     lookup_field = 'uid'

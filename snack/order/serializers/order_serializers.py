@@ -16,7 +16,7 @@ class OrderSerializer(serializers.Serializer):
 
 
 class PurchaseSerializer(serializers.ModelSerializer):
-    # snack = SnackSerializer(source='purchase_set.snack')
+    snack = SnackSerializer()
 
     class Meta:
         model = Purchase
@@ -28,7 +28,6 @@ class OrderDetailSerializer(serializers.Serializer):
     user_id = serializers.IntegerField()
     status = serializers.ChoiceField(choices=OrderStatus.choices)
     user_email = serializers.SerializerMethodField()
-    purchases = SnackSerializer(many=True, read_only=True)
     purchase_set = PurchaseSerializer(many=True, read_only=True)
 
     def get_user_email(self, obj):
