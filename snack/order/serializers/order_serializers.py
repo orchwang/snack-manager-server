@@ -6,10 +6,6 @@ from snack.order.serializers.snack_serializers import SnackSerializer
 
 
 class OrderSerializer(serializers.Serializer):
-    """
-    Order + Snack queryset
-    """
-
     uid = serializers.CharField()
     status = serializers.ChoiceField(choices=OrderStatus.choices)
     user_id = serializers.IntegerField()
@@ -20,8 +16,7 @@ class OrderSerializer(serializers.Serializer):
 
 
 class PurchaseSerializer(serializers.ModelSerializer):
-    snack = SnackSerializer()
-    order = OrderSerializer()
+    # snack = SnackSerializer(source='purchase_set.snack')
 
     class Meta:
         model = Purchase
@@ -30,10 +25,11 @@ class PurchaseSerializer(serializers.ModelSerializer):
 
 class OrderDetailSerializer(serializers.Serializer):
     uid = serializers.CharField()
-    status = serializers.ChoiceField(choices=OrderStatus.choices)
     user_id = serializers.IntegerField()
+    status = serializers.ChoiceField(choices=OrderStatus.choices)
     user_email = serializers.SerializerMethodField()
-    snacks = SnackSerializer(many=True)
+    purchases = SnackSerializer(many=True, read_only=True)
+    purchase_set = PurchaseSerializer(many=True, read_only=True)
 
     def get_user_email(self, obj):
         return obj.user.email
