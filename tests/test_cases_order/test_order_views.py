@@ -1,5 +1,12 @@
+import json
+
 import pytest
+
 from rest_framework.test import APIClient
+
+from django.conf import settings
+from django.core.files import File
+from django.core.files.uploadedfile import SimpleUploadedFile
 
 from snack.order.models import Purchase
 
@@ -65,3 +72,38 @@ class TestGetSnackListView:
         for i in range(len(response_json)):
             assert response_json[i]['uid'] == dummy_snacks_set_1[i].uid
             assert response_json[i]['name'] == dummy_snacks_set_1[i].name
+
+
+class TestPostSnackView:
+    @pytest.mark.django_db
+    def test_create_snack_response_status_201(self, member_user_1):
+        client = APIClient()
+        client.force_authenticate(member_user_1)
+
+        snacks_json_path = f'{settings.TEST_DIR}/fixtures/snacks_raw_data/snacks.json'
+        with open(snacks_json_path, 'r') as json_file:
+            snacks_data = json.load(json_file)
+
+        image = File(
+            open(
+                f'{settings.TEST_DIR}/fixtures/snacks_raw_data/{snacks_data[0].get("image")}',
+                'rb',
+            )
+        )
+        upload_image = SimpleUploadedFile(
+            f'{snacks_data[0].get("image")}', image.read(), content_type='multipart/form-data'
+        )
+        payload = {
+            'name': snacks_data[0].get('name'),
+            'url': snacks_data[0].get('url'),
+            'image': upload_image,
+            'desc': snacks_data[0].get('desc'),
+            'price': snacks_data[0].get('price'),
+            'currency': snacks_data[0].get('currency'),
+        }
+
+        response = client.post('/snacks/', payload, format='multipart')
+        assert response.status_code == 201
+
+        response_json = response.json()
+        assert response_json
