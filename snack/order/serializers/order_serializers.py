@@ -1,5 +1,6 @@
 from rest_framework import serializers
 
+from snack.core.exceptions import InvalidRequest
 from snack.order.models import Purchase, Order, Snack
 from snack.order.constants import OrderStatus
 from snack.order.serializers.snack_serializers import SnackSerializer
@@ -25,14 +26,20 @@ class CreateOrderSerializer(serializers.Serializer):
 
     def create(self, validated_data):
         order = Order.objects.create(user=validated_data.get('user'))
+
         snacks_list = validated_data.get('snacks')
+        if not snacks_list:
+            order.delete()
+            raise InvalidRequest('You cannot order without snacks.')
+
         for snack in snacks_list:
             try:
                 created_snack = Snack.objects.get(uid=snack.get('uid'))
                 purchase = Purchase(order=order, snack=created_snack, quantity=snack.get('quantity'))
                 purchase.save()
             except Snack.DoesNotExist:
-                continue
+                order.delete()
+                raise InvalidRequest('There are invalid snacks in your request.')
 
         return order
 

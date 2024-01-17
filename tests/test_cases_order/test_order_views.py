@@ -47,7 +47,7 @@ class TestRetrieveOrderView:
 
 class TestPostOrderView:
     @pytest.mark.django_db
-    def test_create_snack_response_status_201(self, member_user_1, dummy_orders_set_1, dummy_snacks_set_1):
+    def test_create_order_response_status_201(self, member_user_1, dummy_orders_set_1, dummy_snacks_set_1):
         client = APIClient()
         client.force_authenticate(member_user_1)
 
@@ -70,6 +70,69 @@ class TestPostOrderView:
             snack = Snack.objects.get(uid=item['uid'])
             created_purchases = Purchase.objects.filter(order=created_order, snack=snack).get()
             assert created_purchases.quantity == item['quantity']
+
+    @pytest.mark.django_db
+    def test_create_order_with_invalid_snack_response_status_400(
+        self, member_user_1, dummy_orders_set_1, dummy_snacks_set_1
+    ):
+        client = APIClient()
+        client.force_authenticate(member_user_1)
+
+        all_orders_count = Order.objects.count()
+
+        snacks = [
+            {
+                'uid': 'notavailableuid',
+                'quantity': 1000,
+            }
+        ]
+        payload = {
+            'snacks': snacks,
+        }
+
+        response = client.post('/orders/', payload, format='json')
+        assert response.status_code == 400
+
+        orders_count_after_request = Order.objects.count()
+        assert all_orders_count == orders_count_after_request
+
+    @pytest.mark.django_db
+    def test_create_order_without_snack_response_status_400(
+        self, member_user_1, dummy_orders_set_1, dummy_snacks_set_1
+    ):
+        client = APIClient()
+        client.force_authenticate(member_user_1)
+
+        all_orders_count = Order.objects.count()
+
+        payload = {
+            'snacks': [],
+        }
+
+        response = client.post('/orders/', payload, format='json')
+        assert response.status_code == 400
+
+        orders_count_after_request = Order.objects.count()
+        assert all_orders_count == orders_count_after_request
+
+    @pytest.mark.django_db
+    def test_create_order_with_wrong_type_snack_response_status_400(
+        self, member_user_1, dummy_orders_set_1, dummy_snacks_set_1
+    ):
+        client = APIClient()
+        client.force_authenticate(member_user_1)
+
+        all_orders_count = Order.objects.count()
+
+        payload = {
+            'snacks': 'string is not valid payload',
+        }
+
+        response = client.post('/orders/', payload, format='json')
+        assert response.status_code == 400
+
+        orders_count_after_request = Order.objects.count()
+        assert all_orders_count == orders_count_after_request
 
 
 class TestGetSnackListView:
