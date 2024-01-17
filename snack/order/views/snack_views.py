@@ -14,7 +14,7 @@ from snack.order.models import Snack
     responses={201: SnackSerializer},
     methods=['POST'],
 )
-class SnackListView(generics.ListCreateAPIView):
+class SnackView(generics.ListCreateAPIView):
     queryset = Snack.objects.all()
     permission_classes = [IsAuthenticated]
 

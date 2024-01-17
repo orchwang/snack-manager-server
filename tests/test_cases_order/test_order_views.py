@@ -1,4 +1,5 @@
 import json
+import random
 
 import pytest
 
@@ -8,7 +9,7 @@ from django.conf import settings
 from django.core.files import File
 from django.core.files.uploadedfile import SimpleUploadedFile
 
-from snack.order.models import Purchase
+from snack.order.models import Purchase, Order, Snack
 
 
 class TestGetOrderListView:
@@ -42,6 +43,33 @@ class TestRetrieveOrderView:
             assert purchases[i].snack.id == response_json['purchase_set'][i]['snack']['id']
             assert purchases[i].snack.uid == response_json['purchase_set'][i]['snack']['uid']
             assert purchases[i].snack.name == response_json['purchase_set'][i]['snack']['name']
+
+
+class TestPostOrderView:
+    @pytest.mark.django_db
+    def test_create_snack_response_status_201(self, member_user_1, dummy_orders_set_1, dummy_snacks_set_1):
+        client = APIClient()
+        client.force_authenticate(member_user_1)
+
+        snacks = []
+        for snack in dummy_snacks_set_1:
+            snacks.append({'uid': snack.uid, 'quantity': random.randrange(1, 40)})
+        payload = {
+            'snacks': json.dumps(snacks),
+        }
+
+        response = client.post('/orders/', payload, format='json')
+        assert response.status_code == 201
+
+        response_json = response.json()
+        assert response_json
+
+        created_order = Order.objects.get(uid=response_json['uid'])
+        assert created_order.uid == response_json['uid']
+        for item in snacks:
+            snack = Snack.objects.get(uid=item['uid'])
+            created_purchases = Purchase.objects.filter(order=created_order, snack=snack).get()
+            assert created_purchases.quantity == item['quantity']
 
 
 class TestGetSnackListView:

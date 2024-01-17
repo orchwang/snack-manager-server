@@ -1,6 +1,10 @@
 import pytest
 
-from snack.order.serializers.order_serializers import PurchaseSerializer, OrderSerializer, OrderDetailSerializer
+from snack.order.serializers.order_serializers import (
+    PurchaseSerializer,
+    OrderSerializer,
+    OrderDetailSerializer,
+)
 from snack.order.models import Purchase, Order
 
 

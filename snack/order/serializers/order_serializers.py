@@ -1,6 +1,8 @@
+import json
+
 from rest_framework import serializers
 
-from snack.order.models import Purchase
+from snack.order.models import Purchase, Order, Snack
 from snack.order.constants import OrderStatus
 from snack.order.serializers.snack_serializers import SnackSerializer
 
@@ -13,6 +15,38 @@ class OrderSerializer(serializers.Serializer):
 
     def get_user_email(self, obj):
         return obj.user.email
+
+
+class CreateOrderSerializer(serializers.Serializer):
+    """
+    :param snacks: dumped json object. A example is below.
+
+    [
+        {
+            "uid": "snack uid",
+            "quantity": 10
+        },
+        {
+            "uid": "snack uid",
+            "quantity": 20
+        }
+    ]
+    """
+
+    snacks = serializers.JSONField()
+
+    def create(self, validated_data):
+        order = Order.objects.create(user=validated_data.get('user'))
+        snacks_list = json.loads(validated_data['snacks'])
+        for snack in snacks_list:
+            try:
+                created_snack = Snack.objects.get(uid=snack.get('uid'))
+                purchase = Purchase(order=order, snack=created_snack, quantity=snack.get('quantity'))
+                purchase.save()
+            except Snack.DoesNotExist:
+                continue
+
+        return order
 
 
 class PurchaseSerializer(serializers.ModelSerializer):
