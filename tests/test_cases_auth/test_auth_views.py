@@ -2,6 +2,8 @@ import pytest
 from rest_framework.test import APIClient
 from django.contrib.auth import get_user_model
 
+from snack.core.constants import MemberType
+
 
 class TestUserSignUpView:
     @pytest.mark.django_db
@@ -67,6 +69,26 @@ class TestUserListView:
             assert response_json[i]['username'] == users_list[i].username
             assert response_json[i]['email'] == users_list[i].email
             assert response_json[i]['member_type'] == users_list[i].member_type
+
+
+class TestUpdateUserView:
+    @pytest.mark.django_db
+    def test_user_list_view_response_valid_user_list(self, member_user_1, member_user_2):
+        client = APIClient()
+        client.force_authenticate(member_user_1)
+
+        assert member_user_2.member_type == MemberType.MEMBER
+
+        payload = {'member_type': MemberType.ADMIN}
+        response = client.put(f'/auth/users/{member_user_2.id}', payload, format='json')
+        assert response.status_code == 200
+
+        response_json = response.json()
+        assert response_json['member_type'] == MemberType.ADMIN
+
+        User = get_user_model()
+        updated_user = User.objects.get(id=member_user_2.id)
+        assert updated_user.member_type == MemberType.ADMIN
 
 
 class TestTokenAuthViews:

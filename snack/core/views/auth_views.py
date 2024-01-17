@@ -13,6 +13,7 @@ from snack.core.serializers.user_serializers import (
     CreateUserSerializer,
     UserProfileSerializer,
     UserListSerializer,
+    UpdateUserSerializer,
 )
 from snack.core.serializers.general_serializers import ResponseDetailSerializer
 
@@ -57,3 +58,10 @@ class UserListView(generics.ListAPIView):
     queryset = User.objects
     permission_classes = [IsAuthenticated]
     serializer_class = UserListSerializer
+
+
+class UpdateUserView(generics.UpdateAPIView):
+    queryset = User.objects
+    permission_classes = [IsAuthenticated, IsAdmin]
+    serializer_class = UpdateUserSerializer
+    lookup_field = 'id'
