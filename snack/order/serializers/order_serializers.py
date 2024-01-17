@@ -11,6 +11,8 @@ class OrderSerializer(serializers.Serializer):
     status = serializers.ChoiceField(choices=OrderStatus.choices)
     user_id = serializers.IntegerField()
     user_email = serializers.SerializerMethodField()
+    created_at = serializers.DateTimeField()
+    updated_at = serializers.DateTimeField()
 
     def get_user_email(self, obj):
         return obj.user.email
