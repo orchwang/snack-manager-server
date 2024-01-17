@@ -51,6 +51,24 @@ class TestUserProfileView:
         assert response.status_code == 401
 
 
+class TestUserListView:
+    @pytest.mark.django_db
+    def test_user_list_view_response_valid_user_list(self, member_user_1, member_user_2, member_user_3, member_user_4):
+        client = APIClient()
+        client.force_authenticate(member_user_1)
+
+        response = client.get('/auth/users/')
+        assert response.status_code == 200
+
+        response_json = response.json()
+        users_list = [member_user_1, member_user_2, member_user_3, member_user_4]
+        assert len(response_json) == len(users_list)
+        for i in range(len(response_json)):
+            assert response_json[i]['username'] == users_list[i].username
+            assert response_json[i]['email'] == users_list[i].email
+            assert response_json[i]['member_type'] == users_list[i].member_type
+
+
 class TestTokenAuthViews:
     @pytest.mark.django_db
     def test_with_username_and_password_get_token_success(self, member_user_1):

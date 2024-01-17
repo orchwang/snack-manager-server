@@ -12,6 +12,7 @@ from snack.core.permissions import IsAdmin
 from snack.core.serializers.user_serializers import (
     CreateUserSerializer,
     UserProfileSerializer,
+    UserListSerializer,
 )
 from snack.core.serializers.general_serializers import ResponseDetailSerializer
 
@@ -50,3 +51,9 @@ class UserProfileView(APIView):
     def get(self, request):
         serializer = UserProfileSerializer(self.request.user)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class UserListView(generics.ListAPIView):
+    queryset = User.objects
+    permission_classes = [IsAuthenticated]
+    serializer_class = UserListSerializer
