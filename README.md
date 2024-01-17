@@ -343,6 +343,8 @@ erDiagram
     USER ||--o{ ORDER : places
     ORDER ||--|{ PURCHASE: contains 
     SNACK }|--|{ PURCHASE: include
+    SNACK ||--o{ SNACKREACTION: include
+    SNACKREACTION ||--|| USER: include
 
     USER {
         int id PK
@@ -369,6 +371,12 @@ erDiagram
         enum currency
         float price
     }
+    SNACKREACTION {
+        int id PK
+        int snack_id FK
+        int user_id FK
+        enum type 
+    }
 ```
 
 # Structure
@@ -390,13 +398,4 @@ erDiagram
 ## order app
 
 - 간식 주문 관련 기능
-
-# TODOs
-
-- 요구사항에 근거해 API 설계
-- Permission 세팅
-- Serializer 구현
-- APIView 구현
-- drf-spectacular 이용해 APIView, Serializer 와 병합하여 SwaggerUI 페이지 서빙
-- djangorestframework-simplejwt 를 이용해 인증 API 구현
-- Level2 해당 기능 설계
+- 간식 관리 기능

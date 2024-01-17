@@ -41,6 +41,7 @@ class TestUserProfileView:
         response_json = response.json()
         assert response_json['username'] == member_user_1.username
         assert response_json['email'] == member_user_1.email
+        assert response_json['member_type'] == member_user_1.member_type
 
     @pytest.mark.django_db
     def test_user_profile_without_authentication_response_401(self, member_user_1):

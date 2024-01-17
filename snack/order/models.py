@@ -35,9 +35,15 @@ class Snack(models.Model):
 
 class SnackReaction(models.Model):
     snack = models.ForeignKey(Snack, on_delete=models.CASCADE, to_field='uid', related_name='snack_reactions')
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, on_delete=models.CASCADE)
     type = models.CharField(max_length=10, choices=SnackReactionType.choices, default=SnackReactionType.LIKE)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['snack']),
+        ]
 
 
 class Order(models.Model):
