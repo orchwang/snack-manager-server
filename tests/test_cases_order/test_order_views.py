@@ -72,20 +72,19 @@ class TestPostOrderView:
             assert created_purchases.quantity == item['quantity']
 
     @pytest.mark.django_db
-    def test_create_order_with_invalid_snack_response_status_400(
-        self, member_user_1, dummy_orders_set_1, dummy_snacks_set_1
-    ):
+    def test_create_order_with_invalid_snack_response_status_400(self, member_user_1, dummy_snacks_set_1):
         client = APIClient()
         client.force_authenticate(member_user_1)
 
         all_orders_count = Order.objects.count()
 
-        snacks = [
-            {
-                'uid': 'notavailableuid',
-                'quantity': 1000,
-            }
-        ]
+        snacks = []
+        for snack in dummy_snacks_set_1:
+            snacks.append({'uid': snack.uid, 'quantity': random.randrange(1, 40)})
+        snacks.append({
+            'uid': 'notavailableuid',
+            'quantity': 1000,
+        })
         payload = {
             'snacks': snacks,
         }
@@ -93,8 +92,11 @@ class TestPostOrderView:
         response = client.post('/orders/', payload, format='json')
         assert response.status_code == 400
 
-        orders_count_after_request = Order.objects.count()
+        orders_count_after_request = Order.objects.all().count()
         assert all_orders_count == orders_count_after_request
+
+        created_purchase_count = Purchase.objects.all().count()
+        assert not created_purchase_count
 
     @pytest.mark.django_db
     def test_create_order_without_snack_response_status_400(
