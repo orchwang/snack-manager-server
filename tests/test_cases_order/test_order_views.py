@@ -55,7 +55,7 @@ class TestPostOrderView:
         for snack in dummy_snacks_set_1:
             snacks.append({'uid': snack.uid, 'quantity': random.randrange(1, 40)})
         payload = {
-            'snacks': json.dumps(snacks),
+            'snacks': snacks,
         }
 
         response = client.post('/orders/', payload, format='json')

@@ -1,5 +1,3 @@
-import json
-
 from rest_framework import serializers
 
 from snack.order.models import Purchase, Order, Snack
@@ -17,27 +15,17 @@ class OrderSerializer(serializers.Serializer):
         return obj.user.email
 
 
+class SnackOrderSerializer(serializers.Serializer):
+    uid = serializers.CharField()
+    quantity = serializers.IntegerField()
+
+
 class CreateOrderSerializer(serializers.Serializer):
-    """
-    :param snacks: dumped json object. A example is below.
-
-    [
-        {
-            "uid": "snack uid",
-            "quantity": 10
-        },
-        {
-            "uid": "snack uid",
-            "quantity": 20
-        }
-    ]
-    """
-
-    snacks = serializers.JSONField()
+    snacks = SnackOrderSerializer(many=True)
 
     def create(self, validated_data):
         order = Order.objects.create(user=validated_data.get('user'))
-        snacks_list = json.loads(validated_data['snacks'])
+        snacks_list = validated_data.get('snacks')
         for snack in snacks_list:
             try:
                 created_snack = Snack.objects.get(uid=snack.get('uid'))

@@ -13,7 +13,13 @@ from snack.order.serializers.snack_serializers import SnackDetailSerializer
 from snack.order.models import Order, Snack
 
 
-@extend_schema(description='간식 주문 목록을 불러옵니다.')
+@extend_schema(description='등록된 간식 주문 목록을 불러옵니다.', responses={200: OrderSerializer}, methods=['GET'])
+@extend_schema(
+    description='새로운 주문을 등록합니다.',
+    request=CreateOrderSerializer,
+    responses={201: OrderDetailSerializer},
+    methods=['POST'],
+)
 class OrderView(generics.ListCreateAPIView):
     queryset = Order.objects.all()
     permission_classes = [IsAuthenticated]
