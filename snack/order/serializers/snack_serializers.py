@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
-from snack.order.models import Snack
-from snack.order.constants import Currency
+from snack.order.constants import SnackReactionType
+from snack.order.models import Snack, SnackReaction
 
 
 class SnackSerializer(serializers.ModelSerializer):
@@ -16,13 +16,18 @@ class SnackDetailSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class CreateSnackSerializer(serializers.Serializer):
-    name = serializers.CharField()
-    url = serializers.CharField()
-    desc = serializers.CharField()
-    image = serializers.ImageField()
-    currency = serializers.ChoiceField(choices=Currency, default=Currency.KRW)
-    price = serializers.FloatField()
+class CreateSnackSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Snack
+        fields = ['name', 'url', 'desc', 'image', 'currency', 'price']
 
-    def create(self, validated_data):
-        return Snack.objects.create(**validated_data)
+
+class SnackReactionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SnackReaction
+        fields = '__all__'
+
+
+class CreateSnackReactionSerializer(serializers.Serializer):
+    snack_uid = serializers.CharField()
+    type = serializers.ChoiceField(choices=SnackReactionType)

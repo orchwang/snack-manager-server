@@ -5,8 +5,8 @@ from django.conf import settings
 from django.core.files import File
 from django.core.files.uploadedfile import SimpleUploadedFile
 
-from snack.order.constants import Currency
-from snack.order.models import Snack, Order, Purchase
+from snack.order.constants import Currency, SnackReactionType
+from snack.order.models import Snack, Order, Purchase, SnackReaction
 
 
 @pytest.fixture
@@ -76,3 +76,33 @@ def dummy_orders_set_1(dummy_snacks_set_1, member_user_1, member_user_2, member_
     Purchase.objects.bulk_create(purchase_list)
 
     return orders
+
+
+@pytest.fixture
+def dummy_snacks_reaction_set_1(dummy_snacks_set_1, member_user_1, member_user_2, member_user_3, member_user_4):
+    reactions_list = []
+
+    reactions_list.append(SnackReaction(snack=dummy_snacks_set_1[0], user=member_user_1, type=SnackReactionType.HATE))
+    reactions_list.append(SnackReaction(snack=dummy_snacks_set_1[0], user=member_user_2, type=SnackReactionType.LIKE))
+    reactions_list.append(SnackReaction(snack=dummy_snacks_set_1[0], user=member_user_3, type=SnackReactionType.LIKE))
+    reactions_list.append(SnackReaction(snack=dummy_snacks_set_1[0], user=member_user_4, type=SnackReactionType.LIKE))
+
+    reactions_list.append(SnackReaction(snack=dummy_snacks_set_1[1], user=member_user_1, type=SnackReactionType.LIKE))
+    reactions_list.append(SnackReaction(snack=dummy_snacks_set_1[1], user=member_user_2, type=SnackReactionType.HATE))
+    reactions_list.append(SnackReaction(snack=dummy_snacks_set_1[1], user=member_user_3, type=SnackReactionType.HATE))
+    reactions_list.append(SnackReaction(snack=dummy_snacks_set_1[1], user=member_user_4, type=SnackReactionType.LIKE))
+
+    reactions_list.append(SnackReaction(snack=dummy_snacks_set_1[2], user=member_user_1, type=SnackReactionType.LIKE))
+    reactions_list.append(SnackReaction(snack=dummy_snacks_set_1[2], user=member_user_2, type=SnackReactionType.HATE))
+    reactions_list.append(SnackReaction(snack=dummy_snacks_set_1[2], user=member_user_3, type=SnackReactionType.HATE))
+    reactions_list.append(SnackReaction(snack=dummy_snacks_set_1[2], user=member_user_4, type=SnackReactionType.HATE))
+
+    reactions_list.append(SnackReaction(snack=dummy_snacks_set_1[3], user=member_user_1, type=SnackReactionType.LIKE))
+    reactions_list.append(SnackReaction(snack=dummy_snacks_set_1[3], user=member_user_3, type=SnackReactionType.HATE))
+    reactions_list.append(SnackReaction(snack=dummy_snacks_set_1[3], user=member_user_4, type=SnackReactionType.LIKE))
+
+    reactions_list.append(SnackReaction(snack=dummy_snacks_set_1[4], user=member_user_1, type=SnackReactionType.LIKE))
+    reactions_list.append(SnackReaction(snack=dummy_snacks_set_1[4], user=member_user_4, type=SnackReactionType.LIKE))
+
+    snack_reactions = SnackReaction.objects.bulk_create(reactions_list)
+    return snack_reactions

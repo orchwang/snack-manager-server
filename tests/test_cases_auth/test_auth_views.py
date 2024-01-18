@@ -80,7 +80,7 @@ class TestUpdateUserView:
         assert member_user_2.member_type == MemberType.MEMBER
 
         payload = {'member_type': MemberType.ADMIN}
-        response = client.put(f'/auth/users/{member_user_2.id}', payload, format='json')
+        response = client.put(f'/auth/users/{member_user_2.id}/', payload, format='json')
         assert response.status_code == 200
 
         response_json = response.json()

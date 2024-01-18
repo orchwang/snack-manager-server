@@ -6,6 +6,8 @@ from snack.order.serializers.order_serializers import (
     OrderDetailSerializer,
 )
 from snack.order.models import Purchase, Order
+from snack.order.serializers.snack_serializers import SnackReactionSerializer, CreateSnackReactionSerializer
+from snack.order.constants import SnackReactionType
 
 
 class TestPurchaseSerializers:
@@ -71,9 +73,36 @@ class TestOrderDetailSerializers:
             assert data[i].get('status') == order.status
             purchases = data[i].get('purchase_set')
             ordered_purchases = Purchase.objects.filter(order__uid=dummy_orders_set_1[i].uid).values()
+
+            # test purhcase_set data are valid
             assert len(purchases) == len(ordered_purchases)
             for j in range(len(purchases)):
                 snack = purchases[j].get('snack')
                 order = purchases[j].get('order')
                 assert order == dummy_orders_set_1[i].id
                 assert snack.get('id') == ordered_purchases[j]['snack_id']
+
+
+class TestSnackReactionSerializer:
+    @pytest.mark.django_db
+    def test_snack_reaction_serializer_with_single_snack_reaction_return_valid_data(self, dummy_snacks_reaction_set_1):
+        serializer = SnackReactionSerializer(dummy_snacks_reaction_set_1[0])
+        data = serializer.data
+        assert data['id'] == dummy_snacks_reaction_set_1[0].id
+        assert data['snack'] == dummy_snacks_reaction_set_1[0].snack.id
+        assert data['type'] == dummy_snacks_reaction_set_1[0].type
+
+
+class TestCreateSnackReactionSerializer:
+    @pytest.mark.django_db
+    def test_create_snack_reaction_serializer_create_valid_data(self, dummy_snacks_set_1, member_user_1):
+        serializer = CreateSnackReactionSerializer(
+            data={
+                'snack_uid': dummy_snacks_set_1[0].uid,
+                'type': SnackReactionType.HATE,
+            }
+        )
+        serializer.is_valid()
+        data = serializer.data
+        assert data['snack_uid'] == dummy_snacks_set_1[0].uid
+        assert data['type'] == SnackReactionType.HATE

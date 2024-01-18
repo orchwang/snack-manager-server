@@ -44,6 +44,14 @@ class TestRetrieveOrderView:
             assert purchases[i].snack.uid == response_json['purchase_set'][i]['snack']['uid']
             assert purchases[i].snack.name == response_json['purchase_set'][i]['snack']['name']
 
+    @pytest.mark.django_db
+    def test_retrieve_order_response_status_400(self, dummy_orders_set_1, member_user_1):
+        client = APIClient()
+        client.force_authenticate(member_user_1)
+
+        response = client.get('/orders/fakeuid/')
+        assert response.status_code == 404
+
 
 class TestPostOrderView:
     @pytest.mark.django_db
