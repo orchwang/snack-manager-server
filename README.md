@@ -160,6 +160,7 @@ Permission 구성 요소는 아래와 같습니다. 등급 별 권한이 상이�
 
 - Python==3.11.7
 - Django==4.2.9
+- Postgres==16.1
 
 ## Frontend
 
@@ -289,6 +290,27 @@ flowchart TD
     orderprocess --> |주문 실패| ordersnack
 ```
 
+### Reaction Management
+
+- 개별 Snack model 은 ForeignKey 연결된 SnackReaction Model 에 like, hate 반응을 기록한다.
+- 사용자는 단일 Snack 에 1개의 reaction 을 남길 수 있다.
+  - 1번 사용자는 A 스낵에 like 를 남길 수 있다.
+  - 1번 사용자는 A 스낵에 like 과 hate 를 동시에 남길 수 없다.
+- 사용자는 자신이 남긴 reaction 을 취소할 수 있다.
+  - 1번 사용자는 A 스낵에 남긴 hate 를 남긴 후 like 로 변경하고자 한다.
+  - 이때 1번 사용자가 A 스낵의 hate 를 누르면 "중복해서 reaction 을 남길 수 없다." 는 메시지를 보게 된다.
+  - 1번 사용자는 A 스낵의 like 를 누른다. 이 때 서버에서 like reaction 을 등록하고 hate reaction 을 삭제한다.
+
+
+### Resign Management
+
+- 사용자는 시스템을 탈퇴할 수 있다.
+- 탈퇴 버튼 위치는 sign-out 우측이다.
+- 탈퇴 시 정말 탈퇴할지 한번 더 확인한다.
+- 탈퇴에 성공하게 되면 시스템의 store.auth 를 비운다.
+- 탈퇴 시 서버에서는 사용자 정보를 지우지 않고 is_deleted flag 만 True 처리 한다.
+- 이후 재가입 시도 시 탈퇴한 사용자는 재가입이 불가능하다고 안내한다.
+
 ## 필요한 API 목록
 
 - 회원 가입
@@ -330,6 +352,8 @@ flowchart TD
   shipping--> |간식 배송 완료| completed
   ordered--> |주문 취소| canceled
 ```
+
+- created -> ordered 변경 시 주문에 포함된 간식 중 `hate > like` 인 간식이 한개라도 있다면 변경 실패처리 한다.
 
 # Model
 
