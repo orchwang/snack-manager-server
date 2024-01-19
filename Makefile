@@ -44,7 +44,6 @@ fake-migrate:
 
 test:
 	docker exec -it $(CONTAINER) make test-workflow
-	rm -rf images
 
 test-workflow:
 	poetry run coverage erase
