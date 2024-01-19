@@ -44,6 +44,14 @@ class SnackView(generics.ListCreateAPIView):
     methods=['POST'],
 )
 class SnackReactionViewSet(viewsets.ViewSet):
+    """
+    TODO: Viewset 경험을 위해 구성한 View 이다.
+          해당 API 의 용도에 맞게 사용했다는 생각은 들이 않는다.
+          또한 endpoint 인 `/order/<str:uid>/reactions/` 은
+          Resource 중심의 RESTful 에 어울리지 않는다는 생각이다.
+          아이디어가 필요하다.
+    """
+
     def create(self, request, **kwargs) -> Response:
         snack_uid = kwargs['uid']
         reaction_type_payload = request.data.get('type')
