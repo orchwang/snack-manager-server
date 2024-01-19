@@ -162,9 +162,7 @@ class TestUpdateOrderView:
         snacks = []
         for snack in dummy_snacks_set_1:
             snacks.append({'uid': snack.uid, 'quantity': random.randrange(1, 40)})
-        payload = {
-            'snacks': snacks,
-        }
+        payload = {'snacks': snacks}
 
         response = client.put(f'/orders/{dummy_orders_set_1[0].uid}/', payload, format='json')
         assert response.status_code == 200

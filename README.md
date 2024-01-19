@@ -347,14 +347,19 @@ flowchart TD
   shipping[shipping]
   completed[completed]
   
-  created --> |주문 작성 완료 및 주문| ordered
-  ordered --> |간식 승인| approved
-  approved --> |배송 시작 처리, 예상 도착 일시 입력| shipping
+  approved --> |주문 작성 완료 및 주문| ordered 
+  created --> |간식 승인| approved
+  ordered --> |배송 시작 처리, 예상 도착 일시 입력| shipping
   shipping--> |간식 배송 완료| completed
-  ordered--> |주문 취소| canceled
+  created --> |주문 취소| canceled
 ```
 
-- created -> ordered 변경 시 주문에 포함된 간식 중 `hate > like` 인 간식이 한개라도 있다면 변경 실패처리 한다.
+- created -> ordered 변경 시 주문에 포함된 간식 중 `hate > like` 인 간식이 한개라도 있다면 변경 실패처리 한다. -> 주문 시 필터링 하도록 구현했다.
+
+### UI
+
+- Order List Page 에서 상태를 변경하도록 한다. -> 필드를 추가하고 status dropdown, arrive_estimate_date 를 위한 input 도 추가한다.
+- 변경 시 예상 도착일 (예상 사용일) 을 같이 입력하도록 UI 를 구성한다.
 
 # Model
 
