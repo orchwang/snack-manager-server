@@ -7,6 +7,7 @@ from rest_framework.permissions import IsAuthenticated
 from drf_spectacular.utils import extend_schema
 from rest_framework.response import Response
 
+from snack.core.permissions import IsActive
 from snack.core.serializers.general_serializers import ResponseDetailSerializer
 from snack.order.constants import SnackReactionType
 from snack.order.serializers.snack_serializers import (
@@ -29,7 +30,7 @@ User = get_user_model()
 )
 class SnackView(generics.ListCreateAPIView):
     queryset = Snack.objects.prefetch_related('snack_reactions')
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsActive]
 
     def get_serializer_class(self):
         if self.request.method == 'POST':
@@ -51,6 +52,8 @@ class SnackReactionViewSet(viewsets.ViewSet):
           Resource 중심의 RESTful 에 어울리지 않는다는 생각이다.
           아이디어가 필요하다.
     """
+
+    permission_classes = [IsAuthenticated, IsActive]
 
     def create(self, request, **kwargs) -> Response:
         snack_uid = kwargs['uid']

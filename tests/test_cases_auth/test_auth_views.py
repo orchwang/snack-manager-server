@@ -30,6 +30,24 @@ class TestUserSignUpView:
         response = client.post('/auth/sign-up/', data=payload)
         assert response.status_code == 400
 
+    @pytest.mark.django_db
+    def test_user_sign_up_with_invalid_email_format_failed(self, member_user_1):
+        client = APIClient()
+
+        payload = {'username': 'notduplicatedusername', 'password': 'password', 'email': 'invalidformatemail'}
+
+        response = client.post('/auth/sign-up/', data=payload)
+        assert response.status_code == 400
+
+    @pytest.mark.django_db
+    def test_user_sign_up_with_duplicated_username_failed(self, member_user_1):
+        client = APIClient()
+
+        payload = {'username': member_user_1.username, 'password': 'password', 'email': 'notduplicatedemail.test.com'}
+
+        response = client.post('/auth/sign-up/', data=payload)
+        assert response.status_code == 400
+
 
 class TestUserProfileView:
     @pytest.mark.django_db

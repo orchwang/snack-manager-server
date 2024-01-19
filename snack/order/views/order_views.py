@@ -4,6 +4,7 @@ from rest_framework.permissions import IsAuthenticated
 from drf_spectacular.utils import extend_schema
 from rest_framework.response import Response
 
+from snack.core.permissions import IsActive
 from snack.order.serializers.order_serializers import (
     OrderSerializer,
     OrderDetailSerializer,
@@ -22,7 +23,7 @@ from snack.order.models import Order, Snack
 )
 class OrderView(generics.ListCreateAPIView):
     queryset = Order.objects.all()
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsActive]
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -44,7 +45,7 @@ class OrderView(generics.ListCreateAPIView):
 class RetrieveOrderView(generics.RetrieveAPIView):
     queryset = Order.objects.prefetch_related('purchase_set__snack')
     serializer_class = OrderDetailSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsActive]
     lookup_field = 'uid'
 
 
@@ -52,5 +53,5 @@ class RetrieveOrderView(generics.RetrieveAPIView):
 class RetrieveSnackView(generics.RetrieveAPIView):
     queryset = Snack.objects
     serializer_class = SnackDetailSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsActive]
     lookup_field = 'uid'

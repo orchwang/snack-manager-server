@@ -12,7 +12,7 @@ from drf_spectacular.utils import extend_schema
 
 from snack.core.constants import MemberType
 from snack.core.exceptions import ResignFailed
-from snack.core.permissions import IsAdmin
+from snack.core.permissions import IsAdmin, IsActive
 from snack.core.serializers.user_serializers import (
     UserWriteSerializer,
     UserProfileSerializer,
@@ -32,7 +32,7 @@ class IsAdminCheckView(APIView):
 
 
 class AuthenticationCheckView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsActive]
 
     def get(self, request, format=None):
         return Response({'detail': 'Success'}, status=status.HTTP_200_OK)
@@ -51,7 +51,7 @@ class UserSignUpView(generics.CreateAPIView):
     },
 )
 class UserProfileView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsActive]
 
     def get(self, request):
         serializer = UserProfileSerializer(self.request.user)
@@ -60,13 +60,13 @@ class UserProfileView(APIView):
 
 class UserListView(generics.ListAPIView):
     queryset = User.objects
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsActive]
     serializer_class = UserListSerializer
 
 
 class UpdateUserView(generics.UpdateAPIView):
     queryset = User.objects
-    permission_classes = [IsAuthenticated, IsAdmin]
+    permission_classes = [IsAuthenticated, IsActive, IsAdmin]
     serializer_class = UserUpdateSerializer
     lookup_field = 'id'
 
@@ -78,7 +78,7 @@ class UserResignView(APIView):
           이후 리팩토링 여지 있음.
     """
 
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsActive]
 
     def delete(self, request):
         member_type = request.user.member_type

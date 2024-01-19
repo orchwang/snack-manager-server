@@ -6,6 +6,11 @@ class InvalidEmail(APIException):
     default_detail = 'Invalid email.'
 
 
+class InvalidUsername(APIException):
+    status_code = 400
+    default_detail = 'Invalid username.'
+
+
 class InvalidRequest(APIException):
     status_code = 400
     default_detail = 'Invalid Request.'
