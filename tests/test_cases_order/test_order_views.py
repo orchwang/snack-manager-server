@@ -146,6 +146,40 @@ class TestPostOrderView:
         assert all_orders_count == orders_count_after_request
 
 
+class TestUpdateOrderView:
+    @pytest.mark.django_db
+    def test_update_order_with_snack_data_response_200(
+        self, member_user_1, dummy_orders_set_1, dummy_snacks_set_1, dummy_snacks_reaction_set_1
+    ):
+        client = APIClient()
+        client.force_authenticate(member_user_1)
+
+        existing_order_purchases = Purchase.objects.filter(order=dummy_orders_set_1[0]).all()
+        assert len(existing_order_purchases) == 2
+        assert existing_order_purchases[0].snack == dummy_snacks_set_1[2]
+        assert existing_order_purchases[1].snack == dummy_snacks_set_1[3]
+
+        snacks = []
+        for snack in dummy_snacks_set_1:
+            snacks.append({'uid': snack.uid, 'quantity': random.randrange(1, 40)})
+        payload = {
+            'snacks': snacks,
+        }
+
+        response = client.put(f'/orders/{dummy_orders_set_1[0].uid}/', payload, format='json')
+        assert response.status_code == 200
+
+        response_json = response.json()
+        assert response_json
+
+        created_order = Order.objects.get(uid=response_json['uid'])
+        assert created_order.uid == response_json['uid']
+        for item in snacks:
+            snack = Snack.objects.get(uid=item['uid'])
+            created_purchases = Purchase.objects.filter(order=created_order, snack=snack).get()
+            assert created_purchases.quantity == item['quantity']
+
+
 class TestGetSnackListView:
     @pytest.mark.django_db
     def test_get_snack_list_response_status_200(

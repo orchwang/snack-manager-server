@@ -4,6 +4,7 @@ from rest_framework.permissions import IsAuthenticated
 from drf_spectacular.utils import extend_schema
 from rest_framework.response import Response
 
+from snack.core.exceptions import InvalidUsername as InvalidRequest
 from snack.core.permissions import IsActive
 from snack.order.serializers.order_serializers import (
     OrderSerializer,
@@ -11,7 +12,7 @@ from snack.order.serializers.order_serializers import (
     OrderWriteSerializer,
 )
 from snack.order.serializers.snack_serializers import SnackDetailSerializer
-from snack.order.models import Order, Snack
+from snack.order.models import Order, Snack, Purchase
 
 
 @extend_schema(description='등록된 간식 주문 목록을 불러옵니다.', responses={200: OrderSerializer}, methods=['GET'])
@@ -42,11 +43,46 @@ class OrderView(generics.ListCreateAPIView):
 
 
 @extend_schema(description='특정 간식 주문의 상세 내역을 불러옵니다. 주문 데이터 개요와 선택한 간식 목록이 포함됩니다.')
-class RetrieveOrderView(generics.RetrieveAPIView):
+class RetrieveUpdateOrderView(generics.RetrieveUpdateAPIView):
     queryset = Order.objects.prefetch_related('purchase_set__snack')
     serializer_class = OrderDetailSerializer
     permission_classes = [IsAuthenticated, IsActive]
     lookup_field = 'uid'
+
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+
+        snacks_list = request.data.get('snacks')
+
+        self._check_payload_is_valid(snacks_list)
+
+        self._remove_existing_purchases(instance)
+
+        self._create_new_purchases(instance, snacks_list)
+
+        updated_order = Order.objects.get(uid=instance.uid)
+        serializer = self.get_serializer(updated_order)
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def _check_payload_is_valid(self, snacks_list):
+        if not snacks_list:
+            raise InvalidRequest('You cannot order without snacks.')
+        for snack in snacks_list:
+            try:
+                Snack.objects.filter(uid=snack.get('uid')).get()
+            except Snack.DoesNotExist:
+                raise InvalidRequest('There are invalid snacks in your request.')
+
+    def _remove_existing_purchases(self, order):
+        existing_purchases = Purchase.objects.filter(order=order).all()
+        existing_purchases.delete()
+
+    def _create_new_purchases(self, order, snacks_list):
+        for snack in snacks_list:
+            created_snack = Snack.objects.get(uid=snack.get('uid'))
+            purchase = Purchase(order=order, snack=created_snack, quantity=snack.get('quantity'))
+            purchase.save()
 
 
 @extend_schema(description='특정 간식의 상세 내역을 불러옵니다.')

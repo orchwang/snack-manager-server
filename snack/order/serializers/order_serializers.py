@@ -46,6 +46,10 @@ class OrderWriteSerializer(serializers.Serializer):
         return order
 
 
+class OrderUpdateSerializer(serializers.Serializer):
+    snacks = SnackOrderSerializer(many=True)
+
+
 class PurchaseSerializer(serializers.ModelSerializer):
     snack = SnackSerializer()
 
