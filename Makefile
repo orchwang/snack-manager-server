@@ -47,8 +47,8 @@ test:
 	rm -rf images
 
 test-workflow:
-	coverage erase
-	export DJANGO_SETTINGS_MODULES=$(PROJECT_NAME).settings.test; coverage run -m pytest
+	poetry run coverage erase
+	export DJANGO_SETTINGS_MODULES=$(PROJECT_NAME).settings.test; poetry run coverage run -m pytest
 
 test-tm:
 	docker exec -it $(CONTAINER) pytest -ra -k $(METHOD) --pdb

@@ -1,7 +1,0 @@
-name: Lint
-
-on: [push, pull_request]
-
-jobs:
-  lint:
-    uses: snack/workflow/.github/workflows/lint-python.yml@main

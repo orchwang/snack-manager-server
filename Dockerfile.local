@@ -24,7 +24,7 @@ WORKDIR /app
 COPY . /app
 
 RUN poetry check
-RUN poetry install --no-interaction --no-cache --without dev
+RUN poetry install --no-interaction --no-cache
 
 EXPOSE 3100
 
