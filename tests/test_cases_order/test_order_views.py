@@ -9,7 +9,8 @@ from django.conf import settings
 from django.core.files import File
 from django.core.files.uploadedfile import SimpleUploadedFile
 
-from snack.order.models import Purchase, Order, Snack
+from snack.order.constants import SnackReactionType
+from snack.order.models import Purchase, Order, Snack, SnackReaction
 
 
 class TestGetOrderListView:
@@ -207,3 +208,49 @@ class TestPostSnackView:
 
         response_json = response.json()
         assert response_json
+
+
+class TestSnackReactionViewSet:
+    @pytest.mark.django_db
+    def test_post_snack_reaction_viewset_create_reaction(self, dummy_snacks_set_1, member_user_1):
+        client = APIClient()
+        client.force_authenticate(member_user_1)
+        payload = {'type': SnackReactionType.LIKE.value}
+        response = client.post(f'/snacks/{dummy_snacks_set_1[0].uid}/reaction/', payload, format='json')
+        assert response.status_code == 200
+
+        snack_reaction = SnackReaction.objects.get(snack=dummy_snacks_set_1[0], user=member_user_1)
+        assert snack_reaction.type == payload['type']
+
+    @pytest.mark.django_db
+    def test_post_snack_reaction_viewset_toggle_existing_reaction_to_opposite(
+        self, dummy_snacks_set_1, dummy_snacks_reaction_set_1, member_user_1
+    ):
+        client = APIClient()
+        client.force_authenticate(member_user_1)
+        payload = {'type': SnackReactionType.LIKE.value}
+        response = client.post(f'/snacks/{dummy_snacks_set_1[0].uid}/reaction/', payload, format='json')
+        assert response.status_code == 200
+
+        snack_reaction = SnackReaction.objects.get(snack=dummy_snacks_set_1[0], user=member_user_1)
+        assert snack_reaction.type == payload['type']
+
+    @pytest.mark.django_db
+    def test_post_snack_reaction_viewset_response_400_if_same_type_reaction_exists(
+        self, dummy_snacks_set_1, dummy_snacks_reaction_set_1, member_user_1
+    ):
+        client = APIClient()
+        client.force_authenticate(member_user_1)
+        payload = {'type': SnackReactionType.HATE.value}
+        response = client.post(f'/snacks/{dummy_snacks_set_1[0].uid}/reaction/', payload, format='json')
+        assert response.status_code == 400
+
+    @pytest.mark.django_db
+    def test_post_snack_reaction_viewset_response_400_with_invalid_reaction_type(
+        self, dummy_snacks_set_1, dummy_snacks_reaction_set_1, member_user_1
+    ):
+        client = APIClient()
+        client.force_authenticate(member_user_1)
+        payload = {'type': 'INVALIDTYPE'}
+        response = client.post(f'/snacks/{dummy_snacks_set_1[0].uid}/reaction/', payload, format='json')
+        assert response.status_code == 400

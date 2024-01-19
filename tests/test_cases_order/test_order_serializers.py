@@ -98,11 +98,13 @@ class TestCreateSnackReactionSerializer:
     def test_create_snack_reaction_serializer_create_valid_data(self, dummy_snacks_set_1, member_user_1):
         serializer = CreateSnackReactionSerializer(
             data={
-                'snack_uid': dummy_snacks_set_1[0].uid,
+                'snack': dummy_snacks_set_1[0].uid,
+                'user': member_user_1.id,
                 'type': SnackReactionType.HATE,
             }
         )
         serializer.is_valid()
-        data = serializer.data
-        assert data['snack_uid'] == dummy_snacks_set_1[0].uid
-        assert data['type'] == SnackReactionType.HATE
+        result = serializer.save()
+        assert result.snack.uid == dummy_snacks_set_1[0].uid
+        assert result.user.id == member_user_1.id
+        assert result.type == SnackReactionType.HATE
