@@ -28,7 +28,7 @@ User = get_user_model()
     methods=['POST'],
 )
 class SnackView(generics.ListCreateAPIView):
-    queryset = Snack.objects
+    queryset = Snack.objects.prefetch_related('snack_reactions')
     permission_classes = [IsAuthenticated]
 
     def get_serializer_class(self):
@@ -55,6 +55,7 @@ class SnackReactionViewSet(viewsets.ViewSet):
     def create(self, request, **kwargs) -> Response:
         snack_uid = kwargs['uid']
         reaction_type_payload = request.data.get('type')
+
         try:
             reaction_type = SnackReactionType(reaction_type_payload)
         except ValueError:
