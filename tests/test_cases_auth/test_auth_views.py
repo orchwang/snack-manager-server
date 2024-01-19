@@ -157,3 +157,27 @@ class TestTokenAuthViews:
 
         response = client.get('/checks/is_authenticated/')
         assert response.status_code == 401
+
+
+class TestUserResignView:
+    @pytest.mark.django_db
+    def test_user_resign_success(self, member_user_1, member_user_2):
+        client = APIClient()
+        client.force_authenticate(member_user_2)
+
+        response = client.delete('/auth/user/resign/')
+        assert response.status_code == 200
+
+        User = get_user_model()
+        user = User.objects.get(email=member_user_2.email)
+
+        assert user.is_deleted
+        assert not user.is_active
+
+    @pytest.mark.django_db
+    def test_last_admin_resign_failed_with_status_400(self, member_user_1, member_user_2):
+        client = APIClient()
+        client.force_authenticate(member_user_1)
+
+        response = client.delete('/auth/user/resign/')
+        assert response.status_code == 400
