@@ -14,8 +14,8 @@ convention = 'google'
 [tool.poetry]
 name = "snack"
 version = "0.1.0"
-description = "Snack management system for Datamaker"
-authors = ["Jongtaek Hwang <jongtaek.hwang@datamaker.io>"]
+description = "Snack management system"
+authors = ["Jongtaek Hwang <orchwang@gmail.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]

@@ -115,7 +115,7 @@ SIMPLE_JWT = {
 
 SPECTACULAR_SETTINGS = {
     'TITLE': 'Snack APIs',
-    'DESCRIPTION': 'DataMaker Snack Server APIs Documentation',
+    'DESCRIPTION': 'Snack Server APIs Documentation',
     'VERSION': '1.0.0',
     'SERVE_INCLUDE_SCHEMA': False,
     'SERVE_AUTHENTICATION': ['rest_framework_simplejwt.authentication.JWTAuthentication'],
