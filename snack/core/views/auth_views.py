@@ -10,10 +10,10 @@ from drf_spectacular.utils import extend_schema
 
 from snack.core.permissions import IsAdmin
 from snack.core.serializers.user_serializers import (
-    CreateUserSerializer,
+    UserWriteSerializer,
     UserProfileSerializer,
     UserListSerializer,
-    UpdateUserSerializer,
+    UserUpdateSerializer,
 )
 from snack.core.serializers.general_serializers import ResponseDetailSerializer
 
@@ -36,7 +36,7 @@ class AuthenticationCheckView(APIView):
 
 class UserSignUpView(generics.CreateAPIView):
     permission_classes = [AllowAny]
-    serializer_class = CreateUserSerializer
+    serializer_class = UserWriteSerializer
 
 
 @extend_schema(
@@ -63,5 +63,5 @@ class UserListView(generics.ListAPIView):
 class UpdateUserView(generics.UpdateAPIView):
     queryset = User.objects
     permission_classes = [IsAuthenticated, IsAdmin]
-    serializer_class = UpdateUserSerializer
+    serializer_class = UserUpdateSerializer
     lookup_field = 'id'

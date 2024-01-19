@@ -2,10 +2,10 @@ import pytest
 
 from django.contrib.auth import get_user_model
 
-from snack.core.serializers.user_serializers import CreateUserSerializer
+from snack.core.serializers.user_serializers import UserWriteSerializer
 
 
-class TestCreateUserSerializer:
+class TestUserWriteSerializer:
     @pytest.mark.django_db
     def test_create_user_serializer(self):
         data = {
@@ -14,7 +14,7 @@ class TestCreateUserSerializer:
             'email': 'test_email@test.com',
         }
 
-        serializer = CreateUserSerializer(data=data)
+        serializer = UserWriteSerializer(data=data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
 

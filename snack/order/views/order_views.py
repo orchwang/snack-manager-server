@@ -7,7 +7,7 @@ from rest_framework.response import Response
 from snack.order.serializers.order_serializers import (
     OrderSerializer,
     OrderDetailSerializer,
-    CreateOrderSerializer,
+    OrderWriteSerializer,
 )
 from snack.order.serializers.snack_serializers import SnackDetailSerializer
 from snack.order.models import Order, Snack
@@ -16,7 +16,7 @@ from snack.order.models import Order, Snack
 @extend_schema(description='등록된 간식 주문 목록을 불러옵니다.', responses={200: OrderSerializer}, methods=['GET'])
 @extend_schema(
     description='새로운 주문을 등록합니다.',
-    request=CreateOrderSerializer,
+    request=OrderWriteSerializer,
     responses={201: OrderDetailSerializer},
     methods=['POST'],
 )
@@ -33,7 +33,7 @@ class OrderView(generics.ListCreateAPIView):
 
     def get_serializer_class(self):
         if self.request.method == 'POST':
-            return CreateOrderSerializer
+            return OrderWriteSerializer
         return OrderSerializer
 
     def perform_create(self, serializer):

@@ -6,7 +6,7 @@ from snack.order.serializers.order_serializers import (
     OrderDetailSerializer,
 )
 from snack.order.models import Purchase, Order
-from snack.order.serializers.snack_serializers import SnackReactionSerializer, CreateSnackReactionSerializer
+from snack.order.serializers.snack_serializers import SnackReactionSerializer, SnackReactionWriteSerializer
 from snack.order.constants import SnackReactionType
 
 
@@ -96,7 +96,7 @@ class TestSnackReactionSerializer:
 class TestCreateSnackReactionSerializer:
     @pytest.mark.django_db
     def test_create_snack_reaction_serializer_create_valid_data(self, dummy_snacks_set_1, member_user_1):
-        serializer = CreateSnackReactionSerializer(
+        serializer = SnackReactionWriteSerializer(
             data={
                 'snack': dummy_snacks_set_1[0].uid,
                 'user': member_user_1.id,

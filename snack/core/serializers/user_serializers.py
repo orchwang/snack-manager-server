@@ -5,7 +5,7 @@ from snack.core.constants import MemberType
 from snack.core.exceptions import InvalidEmail
 
 
-class CreateUserSerializer(serializers.ModelSerializer):
+class UserWriteSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ('username', 'email', 'password')
@@ -34,7 +34,7 @@ class UserListSerializer(serializers.ModelSerializer):
         fields = ('id', 'username', 'email', 'member_type', 'date_joined', 'last_login')
 
 
-class UpdateUserSerializer(serializers.Serializer):
+class UserUpdateSerializer(serializers.Serializer):
     member_type = serializers.ChoiceField(choices=MemberType.choices)
 
     def update(self, instance, validated_data):

@@ -23,7 +23,7 @@ class SnackOrderSerializer(serializers.Serializer):
     quantity = serializers.IntegerField()
 
 
-class CreateOrderSerializer(serializers.Serializer):
+class OrderWriteSerializer(serializers.Serializer):
     snacks = SnackOrderSerializer(many=True)
 
     def create(self, validated_data):

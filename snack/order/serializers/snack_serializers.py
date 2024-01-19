@@ -20,7 +20,7 @@ class SnackDetailSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class CreateSnackSerializer(serializers.ModelSerializer):
+class SnackWriteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Snack
         fields = ['name', 'url', 'desc', 'image', 'currency', 'price']
@@ -32,7 +32,7 @@ class SnackReactionSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class CreateSnackReactionSerializer(serializers.ModelSerializer):
+class SnackReactionWriteSerializer(serializers.ModelSerializer):
     snack = serializers.SlugRelatedField(queryset=Snack.objects.all(), slug_field='uid')
     user = serializers.SlugRelatedField(queryset=User.objects.all(), slug_field='id')
     type = serializers.ChoiceField(choices=SnackReactionType)

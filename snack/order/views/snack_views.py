@@ -11,8 +11,8 @@ from snack.core.serializers.general_serializers import ResponseDetailSerializer
 from snack.order.constants import SnackReactionType
 from snack.order.serializers.snack_serializers import (
     SnackSerializer,
-    CreateSnackSerializer,
-    CreateSnackReactionSerializer,
+    SnackReactionWriteSerializer,
+    SnackWriteSerializer,
 )
 from snack.order.models import Snack, SnackReaction
 from snack.order.exceptions import InvalidSnack, InvalidSnackReaction
@@ -23,7 +23,7 @@ User = get_user_model()
 @extend_schema(description='등록된 간식 목록을 불러옵니다.', responses={200: SnackSerializer}, methods=['GET'])
 @extend_schema(
     description='새로운 간식을 등록합니다.',
-    request=CreateSnackSerializer,
+    request=SnackWriteSerializer,
     responses={201: SnackSerializer},
     methods=['POST'],
 )
@@ -33,7 +33,7 @@ class SnackView(generics.ListCreateAPIView):
 
     def get_serializer_class(self):
         if self.request.method == 'POST':
-            return CreateSnackSerializer
+            return SnackWriteSerializer
         return SnackSerializer
 
 
@@ -82,7 +82,7 @@ class SnackReactionViewSet(viewsets.ViewSet):
             self._create_reaction(snack.uid, user.id, reaction_type)
 
     def _create_reaction(self, snack_uid: str, user_id: str, reaction_type: Optional[SnackReactionType]):
-        serializer = CreateSnackReactionSerializer(
+        serializer = SnackReactionWriteSerializer(
             data={
                 'snack': snack_uid,
                 'user': user_id,
