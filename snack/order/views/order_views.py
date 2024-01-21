@@ -5,12 +5,13 @@ from drf_spectacular.utils import extend_schema
 from rest_framework.response import Response
 
 from snack.core.exceptions import InvalidRequest
-from snack.core.permissions import IsActive
+from snack.core.permissions import IsActive, IsAdmin
 from snack.order.serializers.order_serializers import (
     OrderSerializer,
     OrderDetailSerializer,
     OrderWriteSerializer,
     OrderUpdateSerializer,
+    OrderStatusUpdateSerializer,
 )
 from snack.order.serializers.snack_serializers import SnackDetailSerializer
 from snack.order.models import Order, Snack, Purchase
@@ -97,4 +98,12 @@ class RetrieveSnackView(generics.RetrieveAPIView):
     queryset = Snack.objects
     serializer_class = SnackDetailSerializer
     permission_classes = [IsAuthenticated, IsActive]
+    lookup_field = 'uid'
+
+
+@extend_schema(description='특정 간식의 상세 내역을 불러옵니다.')
+class OrderStatusUpdateView(generics.UpdateAPIView):
+    queryset = Order.objects
+    serializer_class = OrderStatusUpdateSerializer
+    permission_classes = [IsAuthenticated, IsActive, IsAdmin]
     lookup_field = 'uid'

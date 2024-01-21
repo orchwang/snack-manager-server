@@ -359,7 +359,7 @@ flowchart TD
 ### UI
 
 - Order List Page 에서 상태를 변경하도록 한다. -> 필드를 추가하고 status dropdown, arrive_estimate_date 를 위한 input 도 추가한다.
-- 변경 시 예상 도착일 (예상 사용일) 을 같이 입력하도록 UI 를 구성한다.
+- 변경 시 예상 도착일 (예상 사용일) 을 같이 입력하도록 UI 를 구성한다.jjk
 
 # Model
 

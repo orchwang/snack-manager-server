@@ -13,6 +13,7 @@ class OrderSerializer(serializers.Serializer):
     user_email = serializers.SerializerMethodField()
     created_at = serializers.DateTimeField()
     updated_at = serializers.DateTimeField()
+    estimated_arrival_time = serializers.DateTimeField()
 
     def get_user_email(self, obj):
         return obj.user.email
@@ -69,3 +70,9 @@ class OrderDetailSerializer(serializers.Serializer):
 
     def get_user_email(self, obj):
         return obj.user.email
+
+
+class OrderStatusUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Order
+        fields = ['status', 'estimated_arrival_time']

@@ -1,13 +1,15 @@
 import pytest
+from django.utils import timezone
 
 from snack.order.serializers.order_serializers import (
     PurchaseSerializer,
     OrderSerializer,
     OrderDetailSerializer,
+    OrderStatusUpdateSerializer,
 )
 from snack.order.models import Purchase, Order
 from snack.order.serializers.snack_serializers import SnackReactionSerializer, SnackReactionWriteSerializer
-from snack.order.constants import SnackReactionType
+from snack.order.constants import SnackReactionType, OrderStatus
 
 
 class TestPurchaseSerializers:
@@ -108,3 +110,17 @@ class TestCreateSnackReactionSerializer:
         assert result.snack.uid == dummy_snacks_set_1[0].uid
         assert result.user.id == member_user_1.id
         assert result.type == SnackReactionType.HATE
+
+
+class TestOrderStatusUpdateSerializer:
+    @pytest.mark.django_db
+    def test_order_status_update_serializer_update_success(self, dummy_orders_set_1):
+        now = timezone.now()
+        serializer = OrderStatusUpdateSerializer(
+            dummy_orders_set_1[0],
+            data={'status': OrderStatus.APPROVED, 'estimated_arrival_time': now},
+        )
+        serializer.is_valid()
+        result = serializer.save()
+        assert result.status == OrderStatus.APPROVED
+        assert result.estimated_arrival_time == now

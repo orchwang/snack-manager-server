@@ -55,6 +55,7 @@ class Order(models.Model):
         related_name='snacks',
         through='Purchase',
     )
+    estimated_arrival_time = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
