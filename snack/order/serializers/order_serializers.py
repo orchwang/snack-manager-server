@@ -1,8 +1,10 @@
+from typing import Optional, List
+
 from rest_framework import serializers
 
 from snack.core.exceptions import InvalidRequest
-from snack.order.models import Purchase, Order, Snack
-from snack.order.constants import OrderStatus
+from snack.order.models import Purchase, Order, Snack, SnackReaction
+from snack.order.constants import OrderStatus, SnackReactionType
 from snack.order.serializers.snack_serializers import SnackSerializer
 
 
@@ -35,16 +37,35 @@ class OrderWriteSerializer(serializers.Serializer):
             order.delete()
             raise InvalidRequest('You cannot order without snacks.')
 
+        snack_instance_list = self._check_snack_list_valid(order, snacks_list)
+
+        self._make_purchases(order, snack_instance_list)
+
+        return order
+
+    def _check_snack_list_valid(self, order: Optional[Order], snacks_list: List):
+        snack_instance_list = []
         for snack in snacks_list:
             try:
                 created_snack = Snack.objects.get(uid=snack.get('uid'))
-                purchase = Purchase(order=order, snack=created_snack, quantity=snack.get('quantity'))
-                purchase.save()
+                like_snack_reaction_count = SnackReaction.objects.filter(
+                    snack=created_snack, type=SnackReactionType.LIKE
+                ).count()
+                hate_snack_reaction_count = SnackReaction.objects.filter(
+                    snack=created_snack, type=SnackReactionType.HATE
+                ).count()
+                if hate_snack_reaction_count > like_snack_reaction_count:
+                    raise InvalidRequest('Rated with hate reactions more than like cannot be ordered.')
+                snack_instance_list.append({'snack': created_snack, 'quantity': snack.get('quantity')})
             except Snack.DoesNotExist:
                 order.delete()
                 raise InvalidRequest('There are invalid snacks in your request.')
+        return snack_instance_list
 
-        return order
+    def _make_purchases(self, order: Optional[Order], snacks_list: List):
+        for item in snacks_list:
+            purchase = Purchase(order=order, snack=item.get('snack'), quantity=item.get('quantity'))
+            purchase.save()
 
 
 class OrderUpdateSerializer(serializers.Serializer):

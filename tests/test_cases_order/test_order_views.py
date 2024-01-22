@@ -192,6 +192,26 @@ class TestPostOrderView:
         orders_count_after_request = Order.objects.count()
         assert all_orders_count == orders_count_after_request
 
+    @pytest.mark.django_db
+    def test_create_order_should_failed_with_snack_which_has_hate_reaction_more_than_like(
+        self, member_user_1, dummy_orders_set_1, dummy_snacks_set_1, dummy_snacks_reaction_set_1
+    ):
+        """
+        dummy_snacks_reaction_set_1[2] has more hate reaction than like reaction
+        """
+        client = APIClient()
+        client.force_authenticate(member_user_1)
+
+        snacks = []
+        for snack in dummy_snacks_set_1:
+            snacks.append({'uid': snack.uid, 'quantity': random.randrange(1, 40)})
+        payload = {
+            'snacks': snacks,
+        }
+
+        response = client.post('/orders/', payload, format='json')
+        assert response.status_code == 400
+
 
 class TestUpdateOrderView:
     @pytest.mark.django_db
