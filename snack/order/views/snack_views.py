@@ -1,7 +1,8 @@
 from typing import Optional
 
 from django.contrib.auth import get_user_model
-from rest_framework import generics, viewsets, status
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import generics, viewsets, status, filters
 from rest_framework.permissions import IsAuthenticated
 
 from drf_spectacular.utils import extend_schema
@@ -29,8 +30,17 @@ User = get_user_model()
     methods=['POST'],
 )
 class SnackView(generics.ListCreateAPIView):
+    """
+    TODO: Reaction Count 를 기준으로 소팅할 수 있어야 한다.
+          ForeignKey 관계를 참조해 Sort 할 경우 DB 에 부하가 많이 걸릴 수 있다.
+          때문에, 별도 field 에 count 를 기록하고 sorting 에 참조해야 한다.
+    """
+
     queryset = Snack.objects.prefetch_related('snack_reactions')
     permission_classes = [IsAuthenticated, IsActive]
+    filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
+    filterset_fields = ['uid']
+    ordering_fields = ['created_at', 'uid', 'like_reaction_count', 'hate_reaction_count']
 
     def get_serializer_class(self):
         if self.request.method == 'POST':
@@ -68,7 +78,17 @@ class SnackReactionViewSet(viewsets.ViewSet):
 
         self._process_toggle_reaction(snack, request.user, reaction_type)
 
+        self._update_reaction_count(snack)
+
         return Response({'detail': 'success'}, status=status.HTTP_200_OK)
+
+    def _update_reaction_count(self, snack):
+        """
+        TODO: 다소 무식한 방법으로 추후 Redis 를 이용해 처리하도록 분산해야 한다.
+        """
+        snack.like_reaction_count = SnackReaction.objects.filter(snack=snack, type=SnackReactionType.LIKE).count()
+        snack.hate_reaction_count = SnackReaction.objects.filter(snack=snack, type=SnackReactionType.HATE).count()
+        snack.save()
 
     def _get_snack_obj(self, snack_uid: str) -> Optional[Snack]:
         try:

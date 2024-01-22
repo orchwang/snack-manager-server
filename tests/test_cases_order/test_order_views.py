@@ -261,6 +261,19 @@ class TestGetSnackListView:
             assert response_json[i]['uid'] == dummy_snacks_set_1[i].uid
             assert response_json[i]['name'] == dummy_snacks_set_1[i].name
 
+    @pytest.mark.django_db
+    def test_get_snack_list_with_like_reaction_count_response_valid_list(
+        self, dummy_orders_set_1, dummy_snacks_set_1, dummy_snacks_reaction_set_1, member_user_1
+    ):
+        client = APIClient()
+        client.force_authenticate(member_user_1)
+
+        response = client.get('/snacks/?ordering=like_reaction_count,created_at')
+        assert response.status_code == 200
+
+        response_json = response.json()
+        assert response_json
+
 
 class TestRetrieveSnackView:
     @pytest.mark.django_db
@@ -337,6 +350,28 @@ class TestSnackReactionViewSet:
 
         snack_reaction = SnackReaction.objects.get(snack=dummy_snacks_set_1[0], user=member_user_1)
         assert snack_reaction.type == payload['type']
+
+    @pytest.mark.django_db
+    def test_post_snack_reaction_viewset_toggle_update_count_fields(
+        self, dummy_snacks_set_1, dummy_snacks_reaction_set_1, member_user_1
+    ):
+        client = APIClient()
+        client.force_authenticate(member_user_1)
+        payload = {'type': SnackReactionType.LIKE.value}
+        response = client.post(f'/snacks/{dummy_snacks_set_1[0].uid}/reaction/', payload, format='json')
+        assert response.status_code == 200
+
+        updated_snack = Snack.objects.get(id=dummy_snacks_set_1[0].id)
+        assert updated_snack.like_reaction_count == 4
+        assert updated_snack.hate_reaction_count == 0
+
+        payload = {'type': SnackReactionType.HATE.value}
+        response = client.post(f'/snacks/{dummy_snacks_set_1[0].uid}/reaction/', payload, format='json')
+        assert response.status_code == 200
+
+        updated_snack = Snack.objects.get(id=dummy_snacks_set_1[0].id)
+        assert updated_snack.like_reaction_count == 3
+        assert updated_snack.hate_reaction_count == 1
 
     @pytest.mark.django_db
     def test_post_snack_reaction_viewset_response_400_if_same_type_reaction_exists(

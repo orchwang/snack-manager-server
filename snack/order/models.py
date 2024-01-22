@@ -22,6 +22,8 @@ class Snack(models.Model):
     desc = models.TextField(blank=True, help_text='Snack description')
     image = models.ImageField(upload_to=snack_image_path)
     currency = models.CharField(max_length=4, choices=Currency.choices, default=Currency.KRW)
+    like_reaction_count = models.IntegerField(default=0)
+    hate_reaction_count = models.IntegerField(default=0)
     price = models.FloatField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

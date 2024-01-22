@@ -11,9 +11,6 @@ User = get_user_model()
 
 
 class SnackSerializer(serializers.ModelSerializer):
-    like_reaction_count = serializers.SerializerMethodField()
-    hate_reaction_count = serializers.SerializerMethodField()
-
     class Meta:
         model = Snack
         fields = '__all__'
