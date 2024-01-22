@@ -9,7 +9,7 @@ from django.conf import settings
 from django.core.files import File
 from django.core.files.uploadedfile import SimpleUploadedFile
 
-from snack.order.constants import SnackReactionType
+from snack.order.constants import SnackReactionType, OrderStatus
 from snack.order.models import Purchase, Order, Snack, SnackReaction
 
 
@@ -22,6 +22,53 @@ class TestGetOrderListView:
         response = client.get('/orders/')
         assert response.status_code == 200
         assert len(response.json()) == len(dummy_orders_set_1)
+
+    @pytest.mark.django_db
+    def test_get_order_list_response_with_uid_fileter_response_specific_order(self, dummy_orders_set_1, member_user_1):
+        client = APIClient()
+        client.force_authenticate(member_user_1)
+
+        response = client.get(f'/orders/?uid={dummy_orders_set_1[0].uid}')
+        assert response.status_code == 200
+        assert len(response.json()) == 1
+        response_json = response.json()
+        assert response_json[0]['uid'] == dummy_orders_set_1[0].uid
+
+    @pytest.mark.django_db
+    def test_get_order_list_response_with_status_fileter_response_specific_order(
+        self, dummy_orders_set_1, member_user_1
+    ):
+        client = APIClient()
+        client.force_authenticate(member_user_1)
+
+        ordered_order = dummy_orders_set_1[1]
+        ordered_order.status = OrderStatus.ORDERED
+        ordered_order.save()
+
+        ordered_orders = Order.objects.filter(status=OrderStatus.ORDERED).all()
+        assert ordered_orders.count() == 1
+
+        response = client.get(f'/orders/?status={OrderStatus.ORDERED.value}')
+        assert response.status_code == 200
+        response_json = response.json()
+        assert response_json[0]['uid'] == dummy_orders_set_1[1].uid
+
+    @pytest.mark.django_db
+    def test_get_order_list_response_with_ordering_query_param_response_sorted_response(
+        self, dummy_orders_set_1, member_user_1
+    ):
+        client = APIClient()
+        client.force_authenticate(member_user_1)
+
+        response = client.get('/orders/?ordering=created_at')
+        assert response.status_code == 200
+        response_json = response.json()
+        assert response_json[0]['uid'] == dummy_orders_set_1[0].uid
+
+        response = client.get('/orders/?ordering=-created_at')
+        assert response.status_code == 200
+        response_json = response.json()
+        assert response_json[0]['uid'] == dummy_orders_set_1[4].uid
 
 
 class TestRetrieveOrderView:

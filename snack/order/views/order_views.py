@@ -1,8 +1,10 @@
-from rest_framework import generics, status
+from rest_framework import generics, status, filters
 from rest_framework.permissions import IsAuthenticated
 
 from drf_spectacular.utils import extend_schema
 from rest_framework.response import Response
+
+from django_filters.rest_framework import DjangoFilterBackend
 
 from snack.core.exceptions import InvalidRequest
 from snack.core.permissions import IsActive, IsAdmin
@@ -27,6 +29,9 @@ from snack.order.models import Order, Snack, Purchase
 class OrderView(generics.ListCreateAPIView):
     queryset = Order.objects.all()
     permission_classes = [IsAuthenticated, IsActive]
+    filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
+    filterset_fields = ['uid', 'status']
+    ordering_fields = ['created_at', 'uid']
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -35,13 +40,13 @@ class OrderView(generics.ListCreateAPIView):
         response_serializer = OrderDetailSerializer(obj)
         return Response(response_serializer.data, status=status.HTTP_201_CREATED)
 
+    def perform_create(self, serializer):
+        return serializer.save(user=self.request.user)
+
     def get_serializer_class(self):
         if self.request.method == 'POST':
             return OrderWriteSerializer
         return OrderSerializer
-
-    def perform_create(self, serializer):
-        return serializer.save(user=self.request.user)
 
 
 @extend_schema(description='특정 간식 주문의 상세 내역을 불러옵니다. 주문 데이터 개요와 선택한 간식 목록이 포함됩니다.')

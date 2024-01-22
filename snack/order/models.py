@@ -6,6 +6,7 @@ from django.db import models
 from shortuuid.django_fields import ShortUUIDField
 
 from snack.order.constants import Currency, OrderStatus, SnackReactionType
+from snack.order.model_managers import SnackManager, OrderManager
 
 
 def snack_image_path(instance, filename):
@@ -23,6 +24,8 @@ class Snack(models.Model):
     price = models.FloatField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    objects = SnackManager()
 
     class Meta:
         indexes = [
@@ -58,6 +61,8 @@ class Order(models.Model):
     estimated_arrival_time = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    objects = OrderManager()
 
     class Meta:
         indexes = [
