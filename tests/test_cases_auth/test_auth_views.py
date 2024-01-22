@@ -55,7 +55,7 @@ class TestUserProfileView:
         client = APIClient()
         client.force_authenticate(member_user_1)
 
-        response = client.get('/auth/user/profile/')
+        response = client.get('/auth/users/profile/')
         assert response.status_code == 200
 
         response_json = response.json()
@@ -67,7 +67,7 @@ class TestUserProfileView:
     def test_user_profile_without_authentication_response_401(self, member_user_1):
         client = APIClient()
 
-        response = client.get('/auth/user/profile/')
+        response = client.get('/auth/users/profile/')
         assert response.status_code == 401
 
 
@@ -183,7 +183,7 @@ class TestUserResignView:
         client = APIClient()
         client.force_authenticate(member_user_2)
 
-        response = client.delete('/auth/user/resign/')
+        response = client.delete('/auth/users/resign/')
         assert response.status_code == 200
 
         User = get_user_model()
@@ -197,5 +197,5 @@ class TestUserResignView:
         client = APIClient()
         client.force_authenticate(member_user_1)
 
-        response = client.delete('/auth/user/resign/')
+        response = client.delete('/auth/users/resign/')
         assert response.status_code == 400
