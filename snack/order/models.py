@@ -7,6 +7,7 @@ from shortuuid.django_fields import ShortUUIDField
 
 from snack.order.constants import Currency, OrderStatus, SnackReactionType
 from snack.order.model_managers import SnackManager, OrderManager
+from snack.order.model_mixins import OrderMixin
 
 
 def snack_image_path(instance, filename):
@@ -49,7 +50,7 @@ class SnackReaction(models.Model):
         ]
 
 
-class Order(models.Model):
+class Order(OrderMixin, models.Model):
     uid = ShortUUIDField(unique=True, editable=False)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     status = models.CharField(max_length=20, choices=OrderStatus.choices, default=OrderStatus.CREATED)
