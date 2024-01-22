@@ -94,7 +94,13 @@ class OrderDetailSerializer(serializers.Serializer):
         return obj.user.email
 
 
-class OrderStatusUpdateSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Order
-        fields = ['status', 'estimated_arrival_time']
+class OrderStatusUpdateSerializer(serializers.Serializer):
+    status = serializers.ChoiceField(choices=OrderStatus.choices)
+    estimated_arrival_time = serializers.DateTimeField()
+
+    def update(self, instance, validated_data):
+        status_to_update = validated_data.get('status')
+        estimated_arrival_time = validated_data.get('estimated_arrival_time')
+        instance.update_status(status_to_update, estimated_arrival_time)
+
+        return Order.objects.get(pk=instance.pk)

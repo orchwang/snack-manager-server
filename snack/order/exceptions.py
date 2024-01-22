@@ -9,3 +9,8 @@ class InvalidSnack(APIException):
 class InvalidSnackReaction(APIException):
     status_code = 400
     default_detail = 'Invalid snack reaction.'
+
+
+class InvalidOrderStatusFlow(APIException):
+    status_code = 400
+    default_detail = 'Invalid order status.'

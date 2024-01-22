@@ -290,18 +290,6 @@ flowchart TD
     orderprocess --> |주문 실패| ordersnack
 ```
 
-### Reaction Management
-
-- 개별 Snack model 은 ForeignKey 연결된 SnackReaction Model 에 like, hate 반응을 기록한다.
-- 사용자는 단일 Snack 에 1개의 reaction 을 남길 수 있다.
-  - 1번 사용자는 A 스낵에 like 를 남길 수 있다.
-  - 1번 사용자는 A 스낵에 like 과 hate 를 동시에 남길 수 없다.
-- 사용자는 자신이 남긴 reaction 을 취소할 수 있다.
-  - 1번 사용자는 A 스낵에 남긴 hate 를 남긴 후 like 로 변경하고자 한다.
-  - 이때 1번 사용자가 A 스낵의 hate 를 누르면 "중복해서 reaction 을 남길 수 없다." 는 메시지를 보게 된다.
-  - 1번 사용자는 A 스낵의 like 를 누른다. 이 때 서버에서 like reaction 을 등록하고 hate reaction 을 삭제한다.
-
-
 ### Resign Management
 
 - 사용자는 시스템을 탈퇴할 수 있다.
@@ -352,14 +340,65 @@ flowchart TD
   ordered --> |배송 시작 처리, 예상 도착 일시 입력| shipping
   shipping--> |간식 배송 완료| completed
   created --> |주문 취소| canceled
+  approved --> |주문 취소| canceled
+```
+ 
+### 유연한 상태 플로우 구현
+
+말그대로 Flow 는 단계를 건너뛰거나 다음 단계로 갈 수 없는 등 오류가 없어야 한다. 더 적은 코드로 적은 오류를 발생시키고 고가용성을 발휘하도록 상태 흐름을 구현한다.
+
+- Order models 의 Mixin 을 별도로 추가하고 상태를 변경하는 메소드를 지원한다.
+- 이외 `직접 업데이트` 등의 방법으로 상태 변경을 금지한다.
+
+### 주문 상태 별 변경 조건 체크
+
+- 예상 도착 일시는 ordered, shipping 에서만 필요하며 업데이트 된다.
+- created -> ordered 변경 시 주문에 포함된 간식 중 `hate > like` 인 간식이 한개라도 있다면 변경 실패처리 한다.
+- 현재 신청하려는 간식 중 아직 주문 (배송중 이상) 되지 않은 간식이 있다면 신청할 수 없다.
+- 주문 진행중인 주문 간식 중 싫어요가 많은 간식이 한개라도 있다면 상태 변경 불가능
+
+## Reaction Management
+
+### 정책 
+
+- 개별 Snack model 은 ForeignKey 연결된 SnackReaction Model 에 like, hate 반응을 기록한다.
+- 사용자는 단일 Snack 에 1개의 reaction 을 남길 수 있다.
+  - 1번 사용자는 A 스낵에 like 를 남길 수 있다.
+  - 1번 사용자는 A 스낵에 like 과 hate 를 동시에 남길 수 없다.
+- 사용자는 자신이 남긴 reaction 을 취소할 수 있다.
+  - 1번 사용자는 A 스낵에 남긴 hate 를 남긴 후 like 로 변경하고자 한다.
+  - 이때 1번 사용자가 A 스낵의 hate 를 누르면 "중복해서 reaction 을 남길 수 없다." 는 메시지를 보게 된다.
+  - 1번 사용자는 A 스낵의 like 를 누른다. 이 때 서버에서 like reaction 을 등록하고 hate reaction 을 삭제한다.
+- 간식 별 수량 집계가 수월해야 한다.
+  - type 별 수량
+  - type 간 비율
+
+### 설계 주의점
+
+- 수량 및 비율 집계는 SQL Query 집계 시 온전한 성능을 발휘하기 어렵다.
+  - 최대한 즉각 반영 되면서 중복문제가 없도록 구현 필요
+  - 수량, 비율 등 집계 지표로 정렬이 가능해야 한다.
+
+### 아키텍처
+
+```mermaid
+---
+title: Reaction 집계 Flow
+---
+flowchart TD
+  created[created]
+
+  approved --> |주문 작성 완료 및 주문| ordered
 ```
 
-- created -> ordered 변경 시 주문에 포함된 간식 중 `hate > like` 인 간식이 한개라도 있다면 변경 실패처리 한다. -> 주문 시 필터링 하도록 구현했다.
+## 주문 필터링 기능 (월별 별도 목록)
+
+
 
 ### UI
 
 - Order List Page 에서 상태를 변경하도록 한다. -> 필드를 추가하고 status dropdown, arrive_estimate_date 를 위한 input 도 추가한다.
-- 변경 시 예상 도착일 (예상 사용일) 을 같이 입력하도록 UI 를 구성한다.jjk
+- 변경 시 예상 도착일 (예상 사용일) 을 같이 입력하도록 UI 를 구성한다.
 
 # Model
 
@@ -374,7 +413,6 @@ erDiagram
     ORDER ||--|{ PURCHASE: contains 
     SNACK }|--|{ PURCHASE: include
     SNACK ||--o{ SNACKREACTION: include
-    SNACKREACTION ||--|| USER: include
 
     USER {
         int id PK

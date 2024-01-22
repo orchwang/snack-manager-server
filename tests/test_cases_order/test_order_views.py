@@ -291,6 +291,27 @@ class TestRetrieveSnackView:
         assert response_json['name'] == dummy_snacks_set_1[0].name
 
 
+class TestUpdateOrderStatus:
+    @pytest.mark.django_db
+    def test_update_order_status_to_approved_success(
+        self, dummy_orders_set_1, dummy_snacks_set_1, dummy_snacks_reaction_set_1, member_user_1
+    ):
+        client = APIClient()
+        client.force_authenticate(member_user_1)
+
+        assert dummy_orders_set_1[0].status == OrderStatus.CREATED
+
+        payload = {
+            'status': OrderStatus.APPROVED.value,
+        }
+        response = client.patch(f'/orders/{dummy_orders_set_1[0].uid}/status/', data=payload, format='json')
+        assert response.status_code == 200
+
+        response_json = response.json()
+        assert response_json['status'] == OrderStatus.APPROVED.value
+        assert not response_json['estimated_arrival_time']
+
+
 class TestPostSnackView:
     @pytest.mark.django_db
     def test_create_snack_response_status_201(self, member_user_1):
