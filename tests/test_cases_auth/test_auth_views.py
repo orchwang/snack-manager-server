@@ -2,7 +2,7 @@ import pytest
 from rest_framework.test import APIClient
 from django.contrib.auth import get_user_model
 
-from snack import MemberType
+from snack.core.constants import MemberType
 
 
 class TestUserSignUpView:

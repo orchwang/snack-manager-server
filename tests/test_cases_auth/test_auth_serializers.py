@@ -2,7 +2,7 @@ import pytest
 
 from django.contrib.auth import get_user_model
 
-from snack import UserProfileSerializer, UserListSerializer
+from snack.core.serializers.user_serializers import UserProfileSerializer, UserListSerializer
 
 User = get_user_model()
 

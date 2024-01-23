@@ -1522,6 +1522,20 @@ pluggy = ">=0.12,<2.0"
 testing = ["argcomplete", "attrs (>=19.2.0)", "hypothesis (>=3.56)", "mock", "nose", "pygments (>=2.7.2)", "requests", "setuptools", "xmlschema"]
 
 [[package]]
+name = "pytest-celery"
+version = "0.0.0"
+description = "pytest-celery a shim pytest plugin to enable celery.contrib.pytest"
+optional = false
+python-versions = "*"
+files = [
+    {file = "pytest-celery-0.0.0.tar.gz", hash = "sha256:cfd060fc32676afa1e4f51b2938f903f7f75d952186b8c6cf631628c4088f406"},
+    {file = "pytest_celery-0.0.0-py2.py3-none-any.whl", hash = "sha256:63dec132df3a839226ecb003ffdbb0c2cb88dd328550957e979c942766578060"},
+]
+
+[package.dependencies]
+celery = ">=4.4.0"
+
+[[package]]
 name = "pytest-django"
 version = "4.7.0"
 description = "A Django plugin for pytest."
@@ -2237,4 +2251,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "61e86b75a7b8954a7954c6771406eee67c611f24e68967e943eb8124a9ff7514"
+content-hash = "6c8ffa0db2dec810f6f6d2118299dcb22db41e0722e1d2a3d485d78218be3215"
