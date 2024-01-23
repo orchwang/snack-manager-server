@@ -368,7 +368,9 @@ flowchart TD
 - 사용자는 자신이 남긴 reaction 을 취소할 수 있다.
   - 1번 사용자는 A 스낵에 남긴 hate 를 남긴 후 like 로 변경하고자 한다.
   - 이때 1번 사용자가 A 스낵의 hate 를 누르면 "중복해서 reaction 을 남길 수 없다." 는 메시지를 보게 된다.
-  - 1번 사용자는 A 스낵의 like 를 누른다. 이 때 서버에서 like reaction 을 등록하고 hate reaction 을 삭제한다.
+  - 1번 사용자는 A 스낵의 like 를 누른다. 
+  - snack, user 에 대응하는 reation 을 get_or_create 하여 get 인 경우 해당 type 으로 업데이트 한다.
+  - Front 에서 업데이트 할 수 있도록 수량을 제공한다.
 - 간식 별 수량 집계가 수월해야 한다.
   - type 별 수량
   - type 간 비율
@@ -378,19 +380,53 @@ flowchart TD
 - 수량 및 비율 집계는 SQL Query 집계 시 온전한 성능을 발휘하기 어렵다.
   - 최대한 즉각 반영 되면서 중복문제가 없도록 구현 필요
   - 수량, 비율 등 집계 지표로 정렬이 가능해야 한다.
+  - 1차: Celery 연동으로 통계용 필드 업데이트 담당(Order 의 통계용 필드들), 즉각 response 해야하는 부분은 바로 db 참조 (SnackReaction)
+  - 2차: Redis cache 를 사용하여 업데이트 -> 속도 증가 차원
 
 ### 아키텍처
 
 ```mermaid
 ---
-title: Reaction 집계 Flow
+title: Reaction 집계 Flow with One2Many Table
 ---
 flowchart TD
-  created[created]
-
-  approved --> |주문 작성 완료 및 주문| ordered
+  user[User]
+  reaction_api[Reaction API]
+  reaction_db[Reaction Table]
+ 
+  user --> |좋아요 클릭| reaction_api
+  reaction_api --> |Reaction 기록 get and update or create| reaction_db
+  reaction_api --> |Reaction 반영 결과 제공| user
 ```
 
+```mermaid
+---
+title: Reaction 집계 Flow with Celery Worker 
+---
+flowchart TD
+  user[User]
+  reaction_api[Reaction API]
+  snack_api[Snack API]
+  statistics_api[Statistics API]
+  statistics_db[Order Table Statistics Field]
+  reaction_db[Reaction Table]
+  celery_task[Celery Reaction Task]
+  celery_redis[Celery Worker with Redis]
+
+  user --> |좋아요 클릭| reaction_api
+  reaction_api --> |통계 테이블 업데이트 요청| celery_task
+  celery_task --> |큐를 거쳐 통계 수치 계산| celery_redis
+  celery_redis --> |통계 수치 업데이트| statistics_db
+  user --> |통계 수치 요청| statistics_api
+  statistics_api --> |통계 수치 쿼리| statistics_db
+  statistics_db --> |통계 수치 제공| statistics_api
+  statistics_api --> |통계 수치 응답| user
+  snack_api --> |통계 수치 쿼리| statistics_db
+  statistics_db --> |통계 수치 제공| snack_api
+  user --> |간식 정보 요청| snack_api
+  snack_api --> |통계 수치 포함된 간식 정보 응답| user
+
+```
 ## 주문 필터링 기능 (월별 별도 목록)
 
 
