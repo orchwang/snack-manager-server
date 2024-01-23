@@ -29,4 +29,6 @@ RUN poetry install --no-interaction --no-cache
 EXPOSE 3100
 
 COPY sh/entrypoints/entrypoint.local.sh /entrypoint.local.sh
+COPY sh/entrypoints/entrypoint-worker.local.sh /entrypoint-worker.local.sh
 RUN chmod +x /entrypoint.local.sh
+RUN chmod +x /entrypoint-worker.local.sh

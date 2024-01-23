@@ -23,3 +23,6 @@ STATIC_ROOT = 'static/'
 
 MEDIA_URL = 'media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
+
+CELERY_BROKER_URL = 'redis://snack-redis:6379'
+CELERY_RESULT_BACKEND = 'redis://snack-redis:6379'

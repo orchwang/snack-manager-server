@@ -1,7 +1,7 @@
 import pytest
 from django.contrib.auth import get_user_model
 
-from snack.core.constants import MemberType
+from snack import MemberType
 
 User = get_user_model()
 

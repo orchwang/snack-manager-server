@@ -2,7 +2,7 @@ import pytest
 
 from django.contrib.auth import get_user_model
 
-from snack.core.serializers.user_serializers import UserWriteSerializer
+from snack import UserWriteSerializer
 
 
 class TestUserWriteSerializer:
