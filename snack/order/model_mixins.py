@@ -1,13 +1,24 @@
 from datetime import datetime
 from typing import Optional
 
+from django.apps import apps
 from django.contrib.auth import get_user_model
 
-from snack.order.constants import OrderStatus
+from snack.order.constants import OrderStatus, SnackReactionType
 
 from snack.order.exceptions import InvalidOrderStatusFlow
 
 User = get_user_model()
+
+
+class SnackMixin:
+    def get_like_reaction_count(self) -> int:
+        SnackReaction = apps.get_model('order', 'SnackReaction')
+        return SnackReaction.objects.filter(snack=self, type=SnackReactionType.LIKE).count()
+
+    def get_hate_reaction_count(self) -> int:
+        SnackReaction = apps.get_model('order', 'SnackReaction')
+        return SnackReaction.objects.filter(snack=self, type=SnackReactionType.HATE).count()
 
 
 class OrderMixin:

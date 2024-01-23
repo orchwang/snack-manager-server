@@ -242,18 +242,12 @@ Permission 구성 요소는 아래와 같습니다. 등급 별 권한이 상이�
 
 - 회원 가입 페이지
 - 로그인 페이지
+- 주문 목록 페이지
 - 간식 목록 페이지
   - 관리자는 간식 상태 변경
 - 통계 페이지
 
-## 모달 목록
-
-- 간식 주문 모달
-- 주문 상태 변경 모달
-
-## Business Process Flow
-
-### Authentication Flow
+## Authentication Flow
 
 ```mermaid
 ---
@@ -270,7 +264,7 @@ flowchart TD
   orderlist --> |로그아웃 성공| login
 ```
 
-### Snack Management Flow
+## Snack Management Flow
 
 ```mermaid
 ---
@@ -290,7 +284,7 @@ flowchart TD
     registerprocess --> |등록 실패| registersnack
 ```
 
-### Order Management Flow
+## Order Management Flow
 
 ```mermaid
 ---
@@ -310,7 +304,7 @@ flowchart TD
     orderprocess --> |주문 실패| ordersnack
 ```
 
-### Resign Management
+## Resign Management
 
 - 사용자는 시스템을 탈퇴할 수 있다.
 - 탈퇴 버튼 위치는 sign-out 우측이다.
@@ -319,18 +313,6 @@ flowchart TD
 - 탈퇴 시 서버에서는 사용자 정보를 지우지 않고 is_deleted flag 만 True 처리 한다.
 - 이후 재가입 시도 시 탈퇴한 사용자는 재가입이 불가능하다고 안내한다.
 - 시스템에 ADMIN 이 본인 1명밖에 없으면 탈퇴할 수 없다.
-
-## 필요한 API 목록
-
-- 회원 가입
-- JWT 발급 (로그인)
-- JWT 리프레시
-- 주문 목록
-- 주문 상세
-- 주문 상태 변경
-- 등록된 간식 목록
-- 간식 작성
-- 월별 주문량 통계
 
 ## Order Status Flow
 
@@ -362,6 +344,11 @@ flowchart TD
   created --> |주문 취소| canceled
   approved --> |주문 취소| canceled
 ```
+
+### 주문 생성 시 제약조건
+
+- 주문 대기중 상태에서만 주문 수정 가능
+- 아직 주문되지 않은 간식 중 신청된 간식이 있는 경우 중복 신청 할 수 없다.
  
 ### 유연한 상태 플로우 구현
 
@@ -402,6 +389,16 @@ flowchart TD
   - 수량, 비율 등 집계 지표로 정렬이 가능해야 한다.
   - 1차: Celery 연동으로 통계용 필드 업데이트 담당(Order 의 통계용 필드들), 즉각 response 해야하는 부분은 바로 db 참조 (SnackReaction)
   - 2차: Redis cache 를 사용하여 업데이트 -> 속도 증가 차원
+
+### 제약조건
+
+- 간식 목록은 좋아요/싫어요 비율이 정렬의 기준이 된다. 해설하면 아래와 같다.
+  - 전제: 싫어요 대비 좋아요 비율을 기준으로 상위 노출되어야 한다.
+  - 좋아요/싫어요 개수가 7/3 인 간식 A와
+  - 60/40 인 간식 B가 있을 때
+  - A 의 비율은 7/3 = 2.3333
+  - B 의 비율은 60/40 = 1.5
+  - 이므로 A 가 B 보다 상위노출 되어야 한다.
 
 ### 아키텍처
 

@@ -3,8 +3,8 @@ from typing import Optional, List
 from rest_framework import serializers
 
 from snack.core.exceptions import InvalidRequest
-from snack.order.models import Purchase, Order, Snack, SnackReaction
-from snack.order.constants import OrderStatus, SnackReactionType
+from snack.order.models import Purchase, Order, Snack
+from snack.order.constants import OrderStatus
 from snack.order.serializers.snack_serializers import SnackSerializer
 
 
@@ -30,12 +30,13 @@ class OrderWriteSerializer(serializers.Serializer):
     snacks = SnackOrderSerializer(many=True)
 
     def create(self, validated_data):
-        order = Order.objects.create(user=validated_data.get('user'))
-
         snacks_list = validated_data.get('snacks')
         if not snacks_list:
-            order.delete()
             raise InvalidRequest('You cannot order without snacks.')
+
+        self._check_not_delivered_orders_exists()
+
+        order = Order.objects.create(user=validated_data.get('user'))
 
         snack_instance_list = self._check_snack_list_valid(order, snacks_list)
 
@@ -43,17 +44,18 @@ class OrderWriteSerializer(serializers.Serializer):
 
         return order
 
+    def _check_not_delivered_orders_exists(self):
+        not_delivered_orders = Order.objects.not_delivered().count()
+        if not_delivered_orders:
+            raise InvalidRequest('You cannot order when not delivered orders are exists.')
+
     def _check_snack_list_valid(self, order: Optional[Order], snacks_list: List):
         snack_instance_list = []
         for snack in snacks_list:
             try:
                 created_snack = Snack.objects.get(uid=snack.get('uid'))
-                like_snack_reaction_count = SnackReaction.objects.filter(
-                    snack=created_snack, type=SnackReactionType.LIKE
-                ).count()
-                hate_snack_reaction_count = SnackReaction.objects.filter(
-                    snack=created_snack, type=SnackReactionType.HATE
-                ).count()
+                like_snack_reaction_count = created_snack.get_like_reaction_count()
+                hate_snack_reaction_count = created_snack.get_hate_reaction_count()
                 if hate_snack_reaction_count > like_snack_reaction_count:
                     raise InvalidRequest('Rated with hate reactions more than like cannot be ordered.')
                 snack_instance_list.append({'snack': created_snack, 'quantity': snack.get('quantity')})

@@ -159,3 +159,29 @@ class TestOrderModelMixins:
 
         updated_order = Order.objects.get(id=dummy_orders_set_1[0].id)
         assert updated_order.status == OrderStatus.ORDERED
+
+
+class TestOrderModelManager:
+    @pytest.mark.django_db
+    def test_order_not_delivered_queryset_response_valid_orders(self, dummy_orders_set_1, member_user_1):
+        order_1 = dummy_orders_set_1[0]
+        order_2 = dummy_orders_set_1[1]
+        order_3 = dummy_orders_set_1[2]
+        order_4 = dummy_orders_set_1[3]
+        order_5 = dummy_orders_set_1[4]
+
+        order_1.status = OrderStatus.CREATED
+        order_2.status = OrderStatus.APPROVED
+        order_3.status = OrderStatus.ORDERED
+        order_4.status = OrderStatus.SHIPPING
+        order_5.status = OrderStatus.COMPLETED
+
+        order_1.save()
+        order_2.save()
+        order_3.save()
+        order_4.save()
+        order_5.save()
+
+        not_delivered_orders = Order.objects.not_delivered().all()
+        for order in not_delivered_orders:
+            assert order.status not in [OrderStatus.CANCELLED, OrderStatus.COMPLETED]

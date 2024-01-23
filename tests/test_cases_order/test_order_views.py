@@ -104,6 +104,25 @@ class TestRetrieveOrderView:
 class TestPostOrderView:
     @pytest.mark.django_db
     def test_create_order_response_status_201(self, member_user_1, dummy_orders_set_1, dummy_snacks_set_1):
+        # Make all orders are delivered or cancelled
+        order_1 = dummy_orders_set_1[0]
+        order_2 = dummy_orders_set_1[1]
+        order_3 = dummy_orders_set_1[2]
+        order_4 = dummy_orders_set_1[3]
+        order_5 = dummy_orders_set_1[4]
+
+        order_1.status = OrderStatus.CANCELLED
+        order_2.status = OrderStatus.COMPLETED
+        order_3.status = OrderStatus.COMPLETED
+        order_4.status = OrderStatus.COMPLETED
+        order_5.status = OrderStatus.CANCELLED
+
+        order_1.save()
+        order_2.save()
+        order_3.save()
+        order_4.save()
+        order_5.save()
+
         client = APIClient()
         client.force_authenticate(member_user_1)
 
@@ -126,6 +145,33 @@ class TestPostOrderView:
             snack = Snack.objects.get(uid=item['uid'])
             created_purchases = Purchase.objects.filter(order=created_order, snack=snack).get()
             assert created_purchases.quantity == item['quantity']
+
+    @pytest.mark.django_db
+    def test_create_order_with_not_delivered_orders_response_status_400(
+        self, member_user_1, dummy_orders_set_1, dummy_snacks_set_1
+    ):
+        # Make all orders are delivered or cancelled
+        order_1 = dummy_orders_set_1[0]
+        order_2 = dummy_orders_set_1[1]
+
+        order_1.status = OrderStatus.CREATED
+        order_2.status = OrderStatus.SHIPPING
+
+        order_1.save()
+        order_2.save()
+
+        client = APIClient()
+        client.force_authenticate(member_user_1)
+
+        snacks = []
+        for snack in dummy_snacks_set_1:
+            snacks.append({'uid': snack.uid, 'quantity': random.randrange(1, 40)})
+        payload = {
+            'snacks': snacks,
+        }
+
+        response = client.post('/orders/', payload, format='json')
+        assert response.status_code == 400
 
     @pytest.mark.django_db
     def test_create_order_with_invalid_snack_response_status_400(self, member_user_1, dummy_snacks_set_1):

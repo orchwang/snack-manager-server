@@ -7,7 +7,7 @@ from shortuuid.django_fields import ShortUUIDField
 
 from snack.order.constants import Currency, OrderStatus, SnackReactionType
 from snack.order.model_managers import SnackManager, OrderManager
-from snack.order.model_mixins import OrderMixin
+from snack.order.model_mixins import OrderMixin, SnackMixin
 
 
 def snack_image_path(instance, filename):
@@ -15,7 +15,7 @@ def snack_image_path(instance, filename):
     return f'images/snack/{str(uuid.uuid4())}{file_extension}'
 
 
-class Snack(models.Model):
+class Snack(SnackMixin, models.Model):
     uid = ShortUUIDField(unique=True, editable=False)
     name = models.CharField(unique=True, max_length=128, blank=True, help_text='Snack name.')
     url = models.CharField(max_length=500, blank=True, help_text='A url for buy the snack.')
@@ -50,6 +50,9 @@ class SnackReaction(models.Model):
         indexes = [
             models.Index(fields=['snack']),
         ]
+
+    def __str__(self):
+        return self.type.value
 
 
 class Order(OrderMixin, models.Model):
