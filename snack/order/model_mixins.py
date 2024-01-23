@@ -69,3 +69,10 @@ class OrderMixin:
             raise InvalidOrderStatusFlow(f'{self.status} order cannot change to {OrderStatus.COMPLETED}')
         self.status = OrderStatus.COMPLETED
         self.save()
+
+    def check_has_hated_snacks(self) -> bool:
+        purchases = self.purchases.all()
+        for snack in purchases:
+            if snack.like_ratio < 1:
+                return True
+        return False

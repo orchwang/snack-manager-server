@@ -103,6 +103,11 @@ class OrderStatusUpdateSerializer(serializers.Serializer):
     def update(self, instance, validated_data):
         status_to_update = validated_data.get('status')
         estimated_arrival_time = validated_data.get('estimated_arrival_time')
+        if (
+            status_to_update in [OrderStatus.APPROVED.value, OrderStatus.ORDERED.value]
+            and instance.check_has_hated_snacks()
+        ):
+            raise InvalidRequest('Your order has hated snacks')
         instance.update_status(status_to_update, estimated_arrival_time)
 
         return Order.objects.get(pk=instance.pk)

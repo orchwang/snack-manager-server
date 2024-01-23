@@ -116,15 +116,14 @@ class TestOrderStatusUpdateSerializer:
     @pytest.mark.django_db
     def test_order_status_update_serializer_update_success(self, dummy_orders_set_1):
         order = dummy_orders_set_1[0]
-        order.status = OrderStatus.APPROVED
+        order.status = OrderStatus.SHIPPING
         order.save()
 
         now = timezone.now()
         serializer = OrderStatusUpdateSerializer(
             dummy_orders_set_1[0],
-            data={'status': OrderStatus.ORDERED, 'estimated_arrival_time': now},
+            data={'status': OrderStatus.COMPLETED, 'estimated_arrival_time': now},
         )
         serializer.is_valid()
         result = serializer.save()
-        assert result.status == OrderStatus.ORDERED
-        assert result.estimated_arrival_time == now
+        assert result.status == OrderStatus.COMPLETED

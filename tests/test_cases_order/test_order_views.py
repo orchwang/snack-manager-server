@@ -345,17 +345,47 @@ class TestUpdateOrderStatus:
         client = APIClient()
         client.force_authenticate(member_user_1)
 
+        assert dummy_orders_set_1[2].status == OrderStatus.CREATED
+
+        payload = {
+            'status': OrderStatus.APPROVED.value,
+        }
+        response = client.patch(f'/orders/{dummy_orders_set_1[2].uid}/status/', data=payload, format='json')
+        assert response.status_code == 200
+
+        response_json = response.json()
+        assert response_json['status'] == OrderStatus.APPROVED.value
+        assert not response_json['estimated_arrival_time']
+
+    @pytest.mark.django_db
+    def test_update_order_status_to_approved_failed_when_order_has_hated_snacks(
+        self, dummy_orders_set_1, dummy_snacks_set_1, dummy_snacks_reaction_set_1, member_user_1
+    ):
+        client = APIClient()
+        client.force_authenticate(member_user_1)
+
         assert dummy_orders_set_1[0].status == OrderStatus.CREATED
 
         payload = {
             'status': OrderStatus.APPROVED.value,
         }
         response = client.patch(f'/orders/{dummy_orders_set_1[0].uid}/status/', data=payload, format='json')
-        assert response.status_code == 200
+        assert response.status_code == 400
 
-        response_json = response.json()
-        assert response_json['status'] == OrderStatus.APPROVED.value
-        assert not response_json['estimated_arrival_time']
+    @pytest.mark.django_db
+    def test_update_order_status_to_approved_success_when_order_do_not_have_hated_snacks(
+        self, dummy_orders_set_1, dummy_snacks_set_1, dummy_snacks_reaction_set_1, member_user_1
+    ):
+        client = APIClient()
+        client.force_authenticate(member_user_1)
+
+        assert dummy_orders_set_1[2].status == OrderStatus.CREATED
+
+        payload = {
+            'status': OrderStatus.APPROVED.value,
+        }
+        response = client.patch(f'/orders/{dummy_orders_set_1[2].uid}/status/', data=payload, format='json')
+        assert response.status_code == 200
 
 
 class TestPostSnackView:

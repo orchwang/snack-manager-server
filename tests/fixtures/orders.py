@@ -123,4 +123,18 @@ def dummy_snacks_reaction_set_1(dummy_snacks_set_1, member_user_1, member_user_2
     create_snack_reaction_row(dummy_snacks_set_1[4], member_user_4, SnackReactionType.LIKE)
 
     snack_reactions = SnackReaction.objects.filter(id__in=reactions_list).all()
+
+    # Update Order count fields
+    for snack in dummy_snacks_set_1:
+        like_count = snack.get_like_reaction_count()
+        hate_count = snack.get_hate_reaction_count()
+        if hate_count:
+            like_ratio = like_count / hate_count
+        else:
+            like_ratio = like_count
+        snack.like_reaction_count = like_count
+        snack.hate_reaction_count = hate_count
+        snack.like_ratio = like_ratio
+        snack.save()
+
     return snack_reactions
