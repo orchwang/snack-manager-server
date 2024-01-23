@@ -2,6 +2,26 @@
 
 데이터메이커 구성원이 사용하는 간식 주문 App 을 위한 Backend API Server
 
+# Project Settings
+
+해당 프로젝트는 [Poetry](https://python-poetry.org/) 를 사용하여 패키징 되었다. 하기 Docker Container 에서도 poetry 를 그대로 사용한다. 모든 세팅은 `pyproject.toml` 에 기록되어 있으며 poetry 로 initialize 할 수 있다.
+
+```shell
+> poetry install
+```
+
+또한 별도 가상환경을 사용하지 않고 poetry 가 제공하는 가상환경을 사용하게 되는데 `activate` 방법은 아래와 같다.
+
+```shell
+> poetry shell
+```
+
+Python 을 통해 실행하는 모든 명령어는 가상환경을 activate 하지 않아도 아래와 같이 사용 가능하다.
+
+```shell
+> poetry run pytest --pdb
+```
+
 # Installation
 
 아래의 과정을 통해 로컬 환경을 세팅합니다.
