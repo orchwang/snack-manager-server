@@ -1,5 +1,6 @@
 from typing import Optional
 
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import generics, viewsets, status, filters
@@ -81,7 +82,8 @@ class SnackReactionViewSet(viewsets.ViewSet):
 
         self._update_reaction_count(snack)
 
-        update_snack_reaction_statistics.delay(snack_uid)
+        if not settings.CELERY_DEBUG:
+            update_snack_reaction_statistics.delay(snack_uid)
 
         return Response({'detail': 'success'}, status=status.HTTP_200_OK)
 

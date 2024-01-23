@@ -2,6 +2,9 @@ import os
 
 from .base import *
 
+DEBUG = True
+CELERY_DEBUG = True
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
