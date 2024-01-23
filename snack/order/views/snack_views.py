@@ -18,6 +18,7 @@ from snack.order.serializers.snack_serializers import (
 )
 from snack.order.models import Snack, SnackReaction
 from snack.order.exceptions import InvalidSnack, InvalidSnackReaction
+from snack.order.tasks import update_snack_reaction_statistics
 
 User = get_user_model()
 
@@ -80,17 +81,17 @@ class SnackReactionViewSet(viewsets.ViewSet):
 
         self._update_reaction_count(snack)
 
-        # update_snack_reaction_statistics.delay(snack_uid)
+        update_snack_reaction_statistics.delay(snack_uid)
 
         return Response({'detail': 'success'}, status=status.HTTP_200_OK)
 
-    # def _update_reaction_count(self, snack):
-    #     """
-    #     TODO: 다소 무식한 방법으로 추후 Redis 를 이용해 처리하도록 분산해야 한다.
-    #     """
-    #     snack.like_reaction_count = SnackReaction.objects.filter(snack=snack, type=SnackReactionType.LIKE).count()
-    #     snack.hate_reaction_count = SnackReaction.objects.filter(snack=snack, type=SnackReactionType.HATE).count()
-    #     snack.save()
+    def _update_reaction_count(self, snack):
+        """
+        TODO: 현재 기준 like_ratio 만 Redis 를 통해 계산한다.
+        """
+        snack.like_reaction_count = SnackReaction.objects.filter(snack=snack, type=SnackReactionType.LIKE).count()
+        snack.hate_reaction_count = SnackReaction.objects.filter(snack=snack, type=SnackReactionType.HATE).count()
+        snack.save()
 
     def _get_snack_obj(self, snack_uid: str) -> Optional[Snack]:
         try:

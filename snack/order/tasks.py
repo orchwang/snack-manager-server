@@ -8,8 +8,8 @@ def update_snack_reaction_statistics(snack_uid):
     snack = Snack.objects.get(uid=snack_uid)
     like_count = snack.get_like_reaction_count()
     hate_count = snack.get_hate_reaction_count()
-    snack.like_reaction_count = like_count
-    snack.hate_reaction_count = hate_count
+    # snack.like_reaction_count = like_count
+    # snack.hate_reaction_count = hate_count
     if not hate_count:
         like_ratio = like_count
     else:
