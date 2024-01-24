@@ -12,4 +12,4 @@ class OrderFilter(django_filters.FilterSet):
 
     class Meta:
         model = Order
-        fields = ['uid', 'status', 'created_at']
+        fields = ['uid', 'status', 'created_at', 'year', 'month', 'day']

@@ -66,6 +66,9 @@ class Order(OrderMixin, models.Model):
         through='Purchase',
     )
     estimated_arrival_time = models.DateTimeField(null=True, blank=True)
+    year = models.IntegerField(null=True, help_text='통계 처리를 위한 생성일시 기준 연도 값')
+    month = models.IntegerField(null=True, help_text='통계 처리를 위한 생성일시 기준 월 값')
+    day = models.IntegerField(null=True, help_text='통계 처리를 위한 생성일시 기준 일 값')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

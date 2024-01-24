@@ -39,6 +39,13 @@ class OrderView(generics.ListCreateAPIView):
         serializer.is_valid(raise_exception=True)
         obj = self.perform_create(serializer)
         response_serializer = OrderDetailSerializer(obj)
+
+        created_instance = response_serializer.instance
+        created_instance.year = created_instance.created_at.year
+        created_instance.month = created_instance.created_at.month
+        created_instance.day = created_instance.created_at.day
+        created_instance.save()
+
         return Response(response_serializer.data, status=status.HTTP_201_CREATED)
 
     def perform_create(self, serializer):

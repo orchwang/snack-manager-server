@@ -86,6 +86,19 @@ class TestGetOrderListView:
         response_json = response.json()
         assert not response_json
 
+    @pytest.mark.django_db
+    def test_get_order_list_with_year_filter_response_200(self, dummy_orders_set_1, member_user_1):
+        client = APIClient()
+        client.force_authenticate(member_user_1)
+
+        response = client.get(f'/orders/?year={dummy_orders_set_1[0].created_at.year}')
+        assert response.status_code == 200
+
+        orders = Order.objects.filter(year=dummy_orders_set_1[0].created_at.year).all()
+
+        response_json = response.json()
+        assert len(response_json) == orders.count()
+
 
 class TestRetrieveOrderView:
     @pytest.mark.django_db
@@ -283,6 +296,58 @@ class TestPostOrderView:
 
         response = client.post('/orders/', payload, format='json')
         assert response.status_code == 400
+
+    @pytest.mark.django_db
+    def test_create_order_should_create_year_month_day_field_value(
+        self, member_user_1, dummy_orders_set_1, dummy_snacks_set_1, dummy_snacks_reaction_set_1
+    ):
+        # Make all orders are delivered or cancelled
+        order_1 = dummy_orders_set_1[0]
+        order_2 = dummy_orders_set_1[1]
+        order_3 = dummy_orders_set_1[2]
+        order_4 = dummy_orders_set_1[3]
+        order_5 = dummy_orders_set_1[4]
+
+        order_1.status = OrderStatus.CANCELLED
+        order_2.status = OrderStatus.COMPLETED
+        order_3.status = OrderStatus.COMPLETED
+        order_4.status = OrderStatus.COMPLETED
+        order_5.status = OrderStatus.CANCELLED
+
+        order_1.save()
+        order_2.save()
+        order_3.save()
+        order_4.save()
+        order_5.save()
+
+        client = APIClient()
+        client.force_authenticate(member_user_1)
+
+        snacks = []
+        snacks_to_order = [
+            dummy_snacks_set_1[0],
+            dummy_snacks_set_1[1],
+            dummy_snacks_set_1[3],
+            dummy_snacks_set_1[4],
+        ]
+
+        for snack in snacks_to_order:
+            snacks.append({'uid': snack.uid, 'quantity': random.randrange(1, 40)})
+
+        payload = {
+            'snacks': snacks,
+        }
+
+        response = client.post('/orders/', payload, format='json')
+        assert response.status_code == 201
+
+        response_json = response.json()
+        assert response_json
+
+        created_order = Order.objects.get(uid=response_json['uid'])
+        assert created_order.year == created_order.created_at.year
+        assert created_order.month == created_order.created_at.month
+        assert created_order.day == created_order.created_at.day
 
 
 class TestUpdateOrderView:

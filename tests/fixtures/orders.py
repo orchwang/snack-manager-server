@@ -53,8 +53,7 @@ def dummy_orders_set_1(dummy_snacks_set_1, member_user_1, member_user_2, member_
     members_list = [member_user_1, member_user_1, member_user_2, member_user_3, member_user_4]
     order_ids_list = []
     for member in members_list:
-        obj = Order(user=member)
-        obj.save()
+        obj = Order.objects.create_initial_order(member)
         order_ids_list.append(obj.id)
 
     orders = Order.objects.filter(id__in=order_ids_list).all()

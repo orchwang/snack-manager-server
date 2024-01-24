@@ -1,6 +1,12 @@
+from typing import Optional
+
+from django.apps import apps
+from django.contrib.auth import get_user_model
 from django.db import models
 
 from snack.order.constants import OrderStatus
+
+User = get_user_model()
 
 
 class SnackManager(models.Manager):
@@ -16,3 +22,11 @@ class OrderManager(models.Manager):
         """
         not_delivered_statuses = [OrderStatus.CREATED, OrderStatus.APPROVED, OrderStatus.ORDERED, OrderStatus.SHIPPING]
         return self.filter(status__in=not_delivered_statuses)
+
+    def create_initial_order(self, user: Optional[User]):
+        Order = apps.get_model('order', 'Order')
+        created_order = Order.objects.create(user=user)
+        created_order.year = created_order.created_at.year
+        created_order.month = created_order.created_at.month
+        created_order.day = created_order.created_at.day
+        return created_order
