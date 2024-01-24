@@ -368,6 +368,11 @@ flowchart TD
 - created -> approved, approved -> ordered 변경 시 주문에 포함된 간식 중 `hate > like` 인 간식이 한개라도 있다면 변경 실패처리 한다.
 - 현재 신청하려는 간식 중 아직 주문 (배송중 이상) 되지 않은 간식이 있다면 신청할 수 없다.
 
+### UI
+
+- Order List Page 에서 상태를 변경하도록 한다. -> 필드를 추가하고 status dropdown, arrive_estimate_date 를 위한 input 도 추가한다.
+- 변경 시 예상 도착일 (예상 사용일) 을 같이 입력하도록 UI 를 구성한다.
+
 ## Reaction Management
 
 ### 정책 
@@ -519,12 +524,6 @@ sequenceDiagram
 
 - 기초 데이터 활용 (구매 수량, 가격 등)
 - 데이터 파이프라인을 통한 지표 수집
-
-
-### UI
-
-- Order List Page 에서 상태를 변경하도록 한다. -> 필드를 추가하고 status dropdown, arrive_estimate_date 를 위한 input 도 추가한다.
-- 변경 시 예상 도착일 (예상 사용일) 을 같이 입력하도록 UI 를 구성한다.
 
 # Model
 
