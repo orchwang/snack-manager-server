@@ -36,9 +36,9 @@ class OrderWriteSerializer(serializers.Serializer):
 
         self._check_not_delivered_orders_exists()
 
-        order = Order.objects.create(user=validated_data.get('user'))
+        snack_instance_list = self._check_snack_list_valid(snacks_list)
 
-        snack_instance_list = self._check_snack_list_valid(order, snacks_list)
+        order = Order.objects.create(user=validated_data.get('user'))
 
         self._make_purchases(order, snack_instance_list)
 
@@ -49,18 +49,25 @@ class OrderWriteSerializer(serializers.Serializer):
         if not_delivered_orders:
             raise InvalidRequest('You cannot order when not delivered orders are exists.')
 
-    def _check_snack_list_valid(self, order: Optional[Order], snacks_list: List):
+    def _check_snack_list_valid(self, snacks_list: List):
+        not_delivered_orders = Order.objects.not_delivered().values_list('id', flat=True)
+        snack_ids_in_not_delivered_orders = Purchase.objects.filter(order_id__in=not_delivered_orders)
+
         snack_instance_list = []
         for snack in snacks_list:
             try:
                 created_snack = Snack.objects.get(uid=snack.get('uid'))
-                like_snack_reaction_count = created_snack.get_like_reaction_count()
-                hate_snack_reaction_count = created_snack.get_hate_reaction_count()
-                if hate_snack_reaction_count > like_snack_reaction_count:
+
+                # 배송 시작 전 주문에 이미 존재하는 간식 여부 검사
+                if created_snack.id in snack_ids_in_not_delivered_orders:
                     raise InvalidRequest('Rated with hate reactions more than like cannot be ordered.')
+
+                # 좋아요 비율 검사
+                if created_snack.like_ratio < 1:
+                    raise InvalidRequest('Rated with hate reactions more than like cannot be ordered.')
+
                 snack_instance_list.append({'snack': created_snack, 'quantity': snack.get('quantity')})
             except Snack.DoesNotExist:
-                order.delete()
                 raise InvalidRequest('There are invalid snacks in your request.')
         return snack_instance_list
 

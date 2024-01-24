@@ -103,7 +103,9 @@ class TestRetrieveOrderView:
 
 class TestPostOrderView:
     @pytest.mark.django_db
-    def test_create_order_response_status_201(self, member_user_1, dummy_orders_set_1, dummy_snacks_set_1):
+    def test_create_order_response_status_201(
+        self, member_user_1, dummy_orders_set_1, dummy_snacks_set_1, dummy_snacks_reaction_set_1
+    ):
         # Make all orders are delivered or cancelled
         order_1 = dummy_orders_set_1[0]
         order_2 = dummy_orders_set_1[1]
@@ -127,7 +129,13 @@ class TestPostOrderView:
         client.force_authenticate(member_user_1)
 
         snacks = []
-        for snack in dummy_snacks_set_1:
+        snacks_to_order = [
+            dummy_snacks_set_1[0],
+            dummy_snacks_set_1[1],
+            dummy_snacks_set_1[3],
+            dummy_snacks_set_1[4],
+        ]
+        for snack in snacks_to_order:
             snacks.append({'uid': snack.uid, 'quantity': random.randrange(1, 40)})
         payload = {
             'snacks': snacks,

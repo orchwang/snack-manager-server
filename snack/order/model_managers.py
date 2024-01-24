@@ -16,6 +16,3 @@ class OrderManager(models.Manager):
         """
         not_delivered_statuses = [OrderStatus.CREATED, OrderStatus.APPROVED, OrderStatus.ORDERED, OrderStatus.SHIPPING]
         return self.filter(status__in=not_delivered_statuses)
-
-    def related_snacks_exists(self):
-        pass
