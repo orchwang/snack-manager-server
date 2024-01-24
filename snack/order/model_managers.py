@@ -24,6 +24,9 @@ class OrderManager(models.Manager):
         return self.filter(status__in=not_delivered_statuses)
 
     def create_initial_order(self, user: Optional[User]):
+        """
+        기본적인 주문을 생성하고 주문 기본정보를 미리 업데이트
+        """
         Order = apps.get_model('order', 'Order')
         created_order = Order.objects.create(user=user)
         created_order.year = created_order.created_at.year
