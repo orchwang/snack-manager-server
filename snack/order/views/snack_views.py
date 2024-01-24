@@ -88,9 +88,6 @@ class SnackReactionViewSet(viewsets.ViewSet):
         return Response({'detail': 'success'}, status=status.HTTP_200_OK)
 
     def _update_reaction_count(self, snack):
-        """
-        TODO: 현재 기준 like_ratio 만 Redis 를 통해 계산한다.
-        """
         snack.like_reaction_count = SnackReaction.objects.filter(snack=snack, type=SnackReactionType.LIKE).count()
         snack.hate_reaction_count = SnackReaction.objects.filter(snack=snack, type=SnackReactionType.HATE).count()
         snack.save()
