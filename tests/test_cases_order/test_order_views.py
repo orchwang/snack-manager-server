@@ -1,7 +1,9 @@
 import json
 import random
+from datetime import timedelta
 
 import pytest
+from django.utils import timezone
 
 from rest_framework.test import APIClient
 
@@ -69,6 +71,20 @@ class TestGetOrderListView:
         assert response.status_code == 200
         response_json = response.json()
         assert response_json[0]['uid'] == dummy_orders_set_1[4].uid
+
+    @pytest.mark.django_db
+    def test_get_order_list_response_with_created_at_get_response_200(self, dummy_orders_set_1, member_user_1):
+        client = APIClient()
+        client.force_authenticate(member_user_1)
+
+        seven_days_after = timezone.now() + timedelta(days=7)
+        iso_format_date = seven_days_after.strftime('%Y-%m-%dT%H:%M:%S')
+
+        response = client.get(f'/orders/?created_at__gte={iso_format_date}')
+        assert response.status_code == 200
+
+        response_json = response.json()
+        assert not response_json
 
 
 class TestRetrieveOrderView:

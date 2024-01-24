@@ -8,6 +8,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 
 from snack.core.exceptions import InvalidRequest
 from snack.core.permissions import IsActive, IsAdmin
+from snack.order.filters import OrderFilter
 from snack.order.serializers.order_serializers import (
     OrderSerializer,
     OrderDetailSerializer,
@@ -30,7 +31,7 @@ class OrderView(generics.ListCreateAPIView):
     queryset = Order.objects.all()
     permission_classes = [IsAuthenticated, IsActive]
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
-    filterset_fields = ['uid', 'status']
+    filterset_class = OrderFilter
     ordering_fields = ['created_at', 'uid']
 
     def create(self, request, *args, **kwargs):
