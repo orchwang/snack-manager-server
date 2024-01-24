@@ -367,7 +367,6 @@ flowchart TD
 - 예상 도착 일시는 ordered, shipping 에서만 필요하며 업데이트 된다.
 - created -> approved, approved -> ordered 변경 시 주문에 포함된 간식 중 `hate > like` 인 간식이 한개라도 있다면 변경 실패처리 한다.
 - 현재 신청하려는 간식 중 아직 주문 (배송중 이상) 되지 않은 간식이 있다면 신청할 수 없다.
-- 주문 진행중인 주문 간식 중 싫어요가 많은 간식이 한개라도 있다면 상태 변경 불가능
 
 ## Reaction Management
 
@@ -404,6 +403,52 @@ flowchart TD
   - A 의 비율은 7/3 = 2.3333
   - B 의 비율은 60/40 = 1.5
   - 이므로 A 가 B 보다 상위노출 되어야 한다.
+
+## Snacks in Order Management
+
+현재 Order 에 속한 Snacks (주문에 포함된 간식) 의 Reaction, 수량 등 다양한 수치가 존재한다. Order 와 연관되어 관리해야하는 로직이 다양하게 발생할 수 있다. 관련된 정책은 아래와 같다.
+
+- 현재 신청하려는 간식 중 `기존 주문 중` 아직 주문 (배송중 이상) 되지 않은 간식이 있다면 신청할 수 없다.
+
+이를 원활하게 처리하기위해 아래의 방안을 고려한다. 
+
+- Order 에 담긴 Snacks 처리 용 Model Mixin
+- Order 에 담긴 Snacks 필터링 용 Model Queryset(Manager)
+- Order 별 Snack 을 별도 API 로 제공
+
+### 현재 신청하려는 간식 중 `기존 주문 중` 아직 주문 (배송중 이상) 되지 않은 간식이 있다면 신청할 수 없다.
+
+- Create Order API Request
+- not_delivered order 에 속한 간식 탐색
+- 현재 신청한 간식 중 위와 중복되는 간식이 존재한다면
+- 주문 반려
+
+```mermaid
+---
+title: 간식 주문 시 중복 간식 검사 시퀀스
+---
+sequenceDiagram
+    participant U as User
+    participant COA as Create Order API View
+    participant S as Order Write Serializer
+    participant DB as Database
+    
+    U->>COA: 신청할 간식 uid, quantity 와 함께 주문
+    COA->>S: 신청한 간식 목록 데이터 전달
+    S->>DB: 아직 주문이 완료되지 않은 주문(not_delivered) 에 속한 간식 목록 쿼리
+    DB-->>S: not_delivered 주문에 속한 간식 목록 응답
+    S-->>S: 신청 간식 목록과 기 존재 간식 목록 비교
+    Note over S,DB: 중복 주문된 간식이 존재하지 않도록 벨리데이션
+    S->>DB: 주문(Order) 생성 및 간식 주문 데이터(Purchase) 생성 쿼리
+    S-->>COA: 주문 생성 완료 처리
+    COA-->>U: 주문 완료 Response
+```
+
+
+## Statistics
+
+주문, 간식 관련 다양한 통계를 제공할 수 있다. 아래의 지표를 통계로 제공한다.
+
 
 ### 아키텍처
 
