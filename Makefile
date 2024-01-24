@@ -49,6 +49,9 @@ test-workflow:
 	poetry run coverage erase
 	export DJANGO_SETTINGS_MODULES=$(PROJECT_NAME).settings.test; poetry run coverage run -m pytest -n 10 --no-migrations
 
+coverage-report:
+	docker exec -it $(CONTAINER) poetry run coverage report
+
 test-tm:
 	docker exec -it $(CONTAINER) pytest -ra -k $(METHOD) --pdb
 
