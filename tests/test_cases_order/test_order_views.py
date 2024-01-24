@@ -135,8 +135,10 @@ class TestPostOrderView:
             dummy_snacks_set_1[3],
             dummy_snacks_set_1[4],
         ]
+
         for snack in snacks_to_order:
             snacks.append({'uid': snack.uid, 'quantity': random.randrange(1, 40)})
+
         payload = {
             'snacks': snacks,
         }

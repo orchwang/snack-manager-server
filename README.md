@@ -404,52 +404,6 @@ flowchart TD
   - B 의 비율은 60/40 = 1.5
   - 이므로 A 가 B 보다 상위노출 되어야 한다.
 
-## Snacks in Order Management
-
-현재 Order 에 속한 Snacks (주문에 포함된 간식) 의 Reaction, 수량 등 다양한 수치가 존재한다. Order 와 연관되어 관리해야하는 로직이 다양하게 발생할 수 있다. 관련된 정책은 아래와 같다.
-
-- 현재 신청하려는 간식 중 `기존 주문 중` 아직 주문 (배송중 이상) 되지 않은 간식이 있다면 신청할 수 없다.
-
-이를 원활하게 처리하기위해 아래의 방안을 고려한다. 
-
-- Order 에 담긴 Snacks 처리 용 Model Mixin
-- Order 에 담긴 Snacks 필터링 용 Model Queryset(Manager)
-- Order 별 Snack 을 별도 API 로 제공
-
-### 현재 신청하려는 간식 중 `기존 주문 중` 아직 주문 (배송중 이상) 되지 않은 간식이 있다면 신청할 수 없다.
-
-- Create Order API Request
-- not_delivered order 에 속한 간식 탐색
-- 현재 신청한 간식 중 위와 중복되는 간식이 존재한다면
-- 주문 반려
-
-```mermaid
----
-title: 간식 주문 시 중복 간식 검사 시퀀스
----
-sequenceDiagram
-    participant U as User
-    participant COA as Create Order API View
-    participant S as Order Write Serializer
-    participant DB as Database
-    
-    U->>COA: 신청할 간식 uid, quantity 와 함께 주문
-    COA->>S: 신청한 간식 목록 데이터 전달
-    S->>DB: 아직 주문이 완료되지 않은 주문(not_delivered) 에 속한 간식 목록 쿼리
-    DB-->>S: not_delivered 주문에 속한 간식 목록 응답
-    S-->>S: 신청 간식 목록과 기 존재 간식 목록 비교
-    Note over S,DB: 중복 주문된 간식이 존재하지 않도록 벨리데이션
-    S->>DB: 주문(Order) 생성 및 간식 주문 데이터(Purchase) 생성 쿼리
-    S-->>COA: 주문 생성 완료 처리
-    COA-->>U: 주문 완료 Response
-```
-
-
-## Statistics
-
-주문, 간식 관련 다양한 통계를 제공할 수 있다. 아래의 지표를 통계로 제공한다.
-
-
 ### 아키텍처
 
 ```mermaid
@@ -492,10 +446,79 @@ flowchart TD
   statistics_db --> |통계 수치 제공| snack_api
   user --> |간식 정보 요청| snack_api
   snack_api --> |통계 수치 포함된 간식 정보 응답| user
-
 ```
-## 주문 필터링 기능 (월별 별도 목록)
 
+## Snacks in Order Management
+
+현재 Order 에 속한 Snacks (주문에 포함된 간식) 의 Reaction, 수량 등 다양한 수치가 존재한다. Order 와 연관되어 관리해야하는 로직이 다양하게 발생할 수 있다. 관련된 정책은 아래와 같다.
+
+- 현재 신청하려는 간식 중 `기존 주문 중` 아직 주문 (배송중 이상) 되지 않은 간식이 있다면 신청할 수 없다.
+
+이를 원활하게 처리하기위해 아래의 방안을 고려한다. 
+
+- Order 에 담긴 Snacks 처리 용 Model Mixin
+- Order 에 담긴 Snacks 필터링 용 Model Queryset(Manager)
+- Order 별 Snack 을 별도 API 로 제공
+
+### 현재 신청하려는 간식 중 `기존 주문 중` 아직 주문 (배송중 이상) 되지 않은 간식이 있다면 신청할 수 없다.
+
+- Create Order API Request
+- not_delivered order 에 속한 간식 탐색
+- 현재 신청한 간식 중 위와 중복되는 간식이 존재한다면
+- 주문 반려
+
+```mermaid
+---
+title: 간식 주문 시 중복 간식 검사 시퀀스
+---
+sequenceDiagram
+    participant U as User
+    participant COA as Create Order API View
+    participant S as Order Write Serializer
+    participant DB as Database
+    
+    U->>COA: 신청할 간식 uid, quantity 와 함께 주문
+    COA->>S: 신청한 간식 목록 데이터 전달
+    S->>DB: 아직 주문이 완료되지 않은 주문(not_delivered) 에 속한 간식 목록 쿼리
+    DB-->>S: not_delivered 주문에 속한 간식 목록 응답
+    S-->>S: 신청 간식 목록과 기 존재 간식 목록 비교
+    Note over S,DB: 중복 주문된 간식이 존재하지 않도록 벨리데이션
+    S->>DB: 주문(Order) 생성 및 간식 주문 데이터(Purchase) 생성 쿼리
+    S-->>COA: 주문 생성 완료 처리
+    COA-->>U: 주문 완료 Response
+```
+
+## Statistics
+
+주문, 간식 관련 다양한 통계를 제공할 수 있다. 아래의 지표를 통계로 제공한다.
+
+1. 상세 목록
+    - 주기별 주문 목록
+    - 주기별 간식 목록
+2. 지표별 수치
+    - 주기별 주문 수량
+    - 주기별 간식 수량
+    - 주기별 주문 금액
+
+### 주기 정의
+
+- 주기는 연, 월, 일 단위로 제공한다.
+- 일 단위 range 형태로 필터링 할 수 있다.
+    - 2024-1-1 ~ 2024-1-14
+- 특정 주기는 별도 인터페이스 를 제공할 수 있다. 
+    - 2024년 1월 1번째주
+    - 2023년 3월
+
+### 상세 목록
+
+- ListAPIView 를 이용한 목록 제공
+- 특정 type 이나 주기별 필터링 제공
+- 복잡한 Join 이 필요한 경우 별도 데이터 수집 파이프라인 고려
+
+### 지표별 수치
+
+- 기초 데이터 활용 (구매 수량, 가격 등)
+- 데이터 파이프라인을 통한 지표 수집
 
 
 ### UI
