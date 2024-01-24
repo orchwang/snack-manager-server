@@ -99,6 +99,36 @@ class TestGetOrderListView:
         response_json = response.json()
         assert len(response_json) == orders.count()
 
+    @pytest.mark.django_db
+    def test_get_order_list_with_month_filter_response_200(self, dummy_orders_set_1, member_user_1):
+        different_month_date = timezone.now() - timedelta(days=300)
+
+        order_2 = dummy_orders_set_1[1]
+        order_2.created_at = different_month_date
+        order_2.year = different_month_date.year
+        order_2.month = different_month_date.month
+        order_2.day = different_month_date.day
+        order_2.save()
+
+        order_3 = dummy_orders_set_1[2]
+        order_3.created_at = different_month_date
+        order_3.year = different_month_date.year
+        order_3.month = different_month_date.month
+        order_3.day = different_month_date.day
+        order_3.save()
+
+        client = APIClient()
+        client.force_authenticate(member_user_1)
+
+        response = client.get(f'/orders/?month={dummy_orders_set_1[0].created_at.month}')
+        assert response.status_code == 200
+
+        orders = Order.objects.filter(month=dummy_orders_set_1[0].created_at.month).all()
+
+        response_json = response.json()
+        assert len(response_json) == 3
+        assert len(response_json) == orders.count()
+
 
 class TestRetrieveOrderView:
     @pytest.mark.django_db

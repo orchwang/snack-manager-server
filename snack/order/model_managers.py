@@ -29,4 +29,5 @@ class OrderManager(models.Manager):
         created_order.year = created_order.created_at.year
         created_order.month = created_order.created_at.month
         created_order.day = created_order.created_at.day
+        created_order.save()
         return created_order
