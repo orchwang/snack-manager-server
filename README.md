@@ -543,6 +543,43 @@ Order 와 연결된 Snack List 를 주기별로 가져올 수 있어야 한다.
 
 주기별 주문 금액 합계를 계산하여 제공한다.
 
+# Cache
+
+Cache 는 하드디스크, 메모리 등 빠른 I/O 를 이용한 DB 혹은 시스템에 저장 후 활용하는 방식으로 용도에 맞게 사용하면 성능 및 리소스 효율성을 극대화 할 수 있다.
+
+## 간식 좋아요 합계
+
+```mermaid
+---
+title: 간식 주문 시 중복 간식 검사 시퀀스
+---
+sequenceDiagram
+    participant U as User
+    participant TRA as Toggle Reaction API
+    participant STA as Statistics API
+    participant S as Toggle Reaction Serializer
+    participant DB as Database
+    participant CC as Redis Cache
+    participant SCHD as Celery Scheduler
+    
+    U->>TRA: 특정 간식에 좋아요 클릭하여 API 요청
+    TRA->>S: 좋아요 클릭한 간식 uid, reaction_type 전달
+    S->>CC: snack_uid 정보 기반으로 캐싱
+    S->>CC: 현재 기준 리액션 수량 요청
+    CC-->>S: 현재 기준 리액션 수량 제공
+    Note over S,CC: 리액션 반영 정보 (snack_uid -> INCR like_count, DECR hate_count)
+    S-->>TRA: 리액션 반영 완료 처리
+    TRA-->>U: 리액션 반영 완료 Response
+    SCHD->>CC: 일정 기간에 업데이트 된 리액션 수량 요청
+    CC-->>SCHD: 일정 기간에 업데이트 된 리액션 수량 제공
+    SCHD->>DB: 일정 기간에 업데이트 된 리액션 수량 업데이트
+    Note over SCHD,DB: 일정 기간 업데이트된 리액션 수량을 DB 에 반영
+    U->>STA: 통계 수치 요청
+    STA->>DB: 통계 수치 쿼리
+    DB-->>STA: 통계 수치 제공
+    STA-->>U: 통계 수치 Response
+    Note over U,STA: Scheduler 에 의해 합산된 통계를 프론트에서 활용
+```
 
 # Model
 

@@ -19,6 +19,13 @@ DATABASES = {
     }
 }
 
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.redis.RedisCache',
+        'LOCATION': 'redis://snack-redis:6379',
+    }
+}
+
 
 STATIC_URL = 'static/'
 STATIC_ROOT = 'static/'
