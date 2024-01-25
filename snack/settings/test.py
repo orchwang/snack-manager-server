@@ -1,5 +1,7 @@
 import os
 
+from fakeredis import FakeConnection
+
 from .base import *
 
 DEBUG = True
@@ -14,8 +16,11 @@ DATABASES = {
 
 CACHES = {
     'default': {
-        'BACKEND': 'django.core.cache.backends.memcached.PyMemcacheCache',
-        'LOCATION': 'unix:/tmp/memcached.sock',
+        'BACKEND': 'django.core.cache.backends.redis.RedisCache',
+        'LOCATION': [
+            'redis://127.0.0.1:6379',
+        ],
+        'OPTIONS': {'connection_class': FakeConnection},
     }
 }
 

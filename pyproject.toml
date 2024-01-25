@@ -35,7 +35,6 @@ celery = "^5.3.6"
 django-celery-beat = "^2.5.0"
 django-celery-results = "^2.5.1"
 redis = "^5.0.1"
-pymemcache = "^4.0.0"
 
 [tool.poetry.group.dev.dependencies]
 poetry = "^1.7.1"
@@ -45,6 +44,7 @@ pytest-xdist = "^3.5.0"
 coverage = "^7.4.0"
 requests-mock = "^1.11.0"
 pytest-celery = "^0.0.0"
+fakeredis = "^2.20.1"
 
 [build-system]
 requires = ["poetry-core"]

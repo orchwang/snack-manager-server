@@ -2,6 +2,7 @@ from typing import Optional
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.core.cache import cache
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import generics, viewsets, status, filters
 from rest_framework.permissions import IsAuthenticated
@@ -80,6 +81,8 @@ class SnackReactionViewSet(viewsets.ViewSet):
 
         self._process_toggle_reaction(snack, request.user, reaction_type)
 
+        self._process_cache(reaction_type, snack)
+
         self._update_reaction_count(snack)
 
         if not settings.CELERY_DEBUG:
@@ -87,9 +90,19 @@ class SnackReactionViewSet(viewsets.ViewSet):
 
         return Response({'detail': 'success'}, status=status.HTTP_200_OK)
 
+    def _process_cache(self, reaction_type, snack):
+        cache.get_or_set(f'{snack.uid}-{SnackReactionType.LIKE.value}', 0)
+        cache.get_or_set(f'{snack.uid}-{SnackReactionType.HATE.value}', 0)
+        if reaction_type == SnackReactionType.LIKE:
+            cache.incr(f'{snack.uid}-{SnackReactionType.LIKE.value}', 1)
+            cache.decr(f'{snack.uid}-{SnackReactionType.HATE.value}', 1)
+        elif reaction_type == SnackReactionType.HATE:
+            cache.incr(f'{snack.uid}-{SnackReactionType.HATE.value}', 1)
+            cache.decr(f'{snack.uid}-{SnackReactionType.LIKE.value}', 1)
+
     def _update_reaction_count(self, snack):
-        snack.like_reaction_count = SnackReaction.objects.filter(snack=snack, type=SnackReactionType.LIKE).count()
-        snack.hate_reaction_count = SnackReaction.objects.filter(snack=snack, type=SnackReactionType.HATE).count()
+        snack.like_reaction_count = cache.get(f'{snack.uid}-{SnackReactionType.LIKE.value}')
+        snack.hate_reaction_count = cache.get(f'{snack.uid}-{SnackReactionType.HATE.value}')
         snack.save()
 
     def _get_snack_obj(self, snack_uid: str) -> Optional[Snack]:
