@@ -1,10 +1,11 @@
-from snack.order.models import Snack
+from django.apps import apps
 
 from snack.celery import app
 
 
 @app.task
-def update_snack_reaction_statistics(snack_uid):
+def update_snack_reaction_statistics(snack_uid: str):
+    Snack = apps.get_model('order', 'Snack')
     snack = Snack.objects.get(uid=snack_uid)
     like_count = snack.get_like_reaction_count()
     hate_count = snack.get_hate_reaction_count()

@@ -1,8 +1,6 @@
 from typing import Optional
 
-from django.conf import settings
 from django.contrib.auth import get_user_model
-from django.core.cache import cache
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import generics, viewsets, status, filters
 from rest_framework.permissions import IsAuthenticated
@@ -15,12 +13,11 @@ from snack.core.serializers.general_serializers import ResponseDetailSerializer
 from snack.order.constants import SnackReactionType
 from snack.order.serializers.snack_serializers import (
     SnackSerializer,
-    SnackReactionWriteSerializer,
     SnackWriteSerializer,
 )
-from snack.order.models import Snack, SnackReaction
+from snack.order.models import Snack
 from snack.order.exceptions import InvalidSnack, InvalidSnackReaction
-from snack.order.tasks import update_snack_reaction_statistics
+
 
 User = get_user_model()
 
@@ -79,62 +76,12 @@ class SnackReactionViewSet(viewsets.ViewSet):
 
         snack = self._get_snack_obj(snack_uid)
 
-        self._process_toggle_reaction(snack, request.user, reaction_type)
-
-        self._process_cache(reaction_type, snack)
-
-        self._update_reaction_count(snack)
-
-        if not settings.CELERY_DEBUG:
-            update_snack_reaction_statistics.delay(snack_uid)
+        snack.toggle_reaction(request.user, reaction_type)
 
         return Response({'detail': 'success'}, status=status.HTTP_200_OK)
-
-    def _process_cache(self, reaction_type, snack):
-        cache.get_or_set(f'{snack.uid}-{SnackReactionType.LIKE.value}', 0)
-        cache.get_or_set(f'{snack.uid}-{SnackReactionType.HATE.value}', 0)
-        if reaction_type == SnackReactionType.LIKE:
-            cache.incr(f'{snack.uid}-{SnackReactionType.LIKE.value}', 1)
-            cache.decr(f'{snack.uid}-{SnackReactionType.HATE.value}', 1)
-        elif reaction_type == SnackReactionType.HATE:
-            cache.incr(f'{snack.uid}-{SnackReactionType.HATE.value}', 1)
-            cache.decr(f'{snack.uid}-{SnackReactionType.LIKE.value}', 1)
-
-    def _update_reaction_count(self, snack):
-        snack.like_reaction_count = cache.get(f'{snack.uid}-{SnackReactionType.LIKE.value}')
-        snack.hate_reaction_count = cache.get(f'{snack.uid}-{SnackReactionType.HATE.value}')
-        snack.save()
 
     def _get_snack_obj(self, snack_uid: str) -> Optional[Snack]:
         try:
             return Snack.objects.get(uid=snack_uid)
         except Snack.DoesNotExist:
             raise InvalidSnack(f'Snack not found with uid "{snack_uid}".')
-
-    def _process_toggle_reaction(
-        self, snack: Optional[Snack], user: Optional[User], reaction_type: Optional[SnackReactionType]
-    ):
-        try:
-            # Check existing reaction
-            snack_reaction = SnackReaction.objects.get(snack=snack, user=user)
-
-            # Check duplicated reaction
-            if snack_reaction.type == reaction_type:
-                raise InvalidSnackReaction('You cannot react same reaction.')
-            else:
-                # Toggle if opposite reaction exists
-                snack_reaction.delete()
-                self._create_reaction(snack.uid, user.id, reaction_type)
-        except SnackReaction.DoesNotExist:
-            self._create_reaction(snack.uid, user.id, reaction_type)
-
-    def _create_reaction(self, snack_uid: str, user_id: str, reaction_type: Optional[SnackReactionType]):
-        serializer = SnackReactionWriteSerializer(
-            data={
-                'snack': snack_uid,
-                'user': user_id,
-                'type': reaction_type,
-            }
-        )
-        serializer.is_valid()
-        serializer.save()
