@@ -37,17 +37,26 @@ class SnackMixin:
             update_snack_reaction_statistics.delay(self.uid)
 
     def _process_cache(self, reaction_type: Optional[SnackReactionType], snack):
-        cache.get_or_set(f'{snack.uid}-{SnackReactionType.LIKE.value}', 0)
-        cache.get_or_set(f'{snack.uid}-{SnackReactionType.HATE.value}', 0)
-        if reaction_type == SnackReactionType.LIKE:
-            cache.incr(f'{snack.uid}-{SnackReactionType.LIKE.value}', 1)
-            cache.decr(f'{snack.uid}-{SnackReactionType.HATE.value}', 1)
-        elif reaction_type == SnackReactionType.HATE:
-            cache.incr(f'{snack.uid}-{SnackReactionType.HATE.value}', 1)
-            cache.decr(f'{snack.uid}-{SnackReactionType.LIKE.value}', 1)
+        like_count = cache.get(f'{snack.uid}-{SnackReactionType.LIKE.value}')
+        hate_count = cache.get(f'{snack.uid}-{SnackReactionType.HATE.value}')
 
-        snack.like_reaction_count = cache.get(f'{snack.uid}-{SnackReactionType.LIKE.value}')
-        snack.hate_reaction_count = cache.get(f'{snack.uid}-{SnackReactionType.HATE.value}')
+        if not like_count:
+            like_count = snack.get_like_reaction_count()
+        if not hate_count:
+            hate_count = snack.get_hate_reaction_count()
+
+        if reaction_type == SnackReactionType.LIKE:
+            like_count += 1
+            hate_count -= 1
+        elif reaction_type == SnackReactionType.HATE:
+            like_count -= 1
+            hate_count += 1
+
+        cache.set(f'{snack.uid}-{SnackReactionType.LIKE.value}', like_count)
+        cache.set(f'{snack.uid}-{SnackReactionType.HATE.value}', hate_count)
+
+        snack.like_reaction_count = like_count
+        snack.hate_reaction_count = hate_count
         snack.save()
 
 

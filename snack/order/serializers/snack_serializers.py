@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model
+
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
@@ -17,10 +18,12 @@ class SnackSerializer(serializers.ModelSerializer):
 
     @extend_schema_field(OpenApiTypes.INT)
     def get_like_reaction_count(self, obj):
+        # return cache.get(f'{obj.uid}-{SnackReactionType.LIKE.value}', 0)
         return obj.snack_reactions.filter(type=SnackReactionType.LIKE).count()
 
     @extend_schema_field(OpenApiTypes.INT)
     def get_hate_reaction_count(self, obj):
+        # return cache.get(f'{obj.uid}-{SnackReactionType.HATE.value}', 0)
         return obj.snack_reactions.filter(type=SnackReactionType.HATE).count()
 
 
