@@ -652,6 +652,20 @@ SADD snack:hate:<snack_id> <user_id>
 ```
 
 - 등록되어 있지 않아도 삭제하는 낭비가 발생하고 있으나, 검사하는 비용 보다는 덜 들것으로 보임
+- 하지만 설계 해 본다.
+
+```redis
+SISMEMBER snack:like:<snack_id> <user_id>
+# 1 이 리턴되면
+SREM snack:like:<snack_id> <user_id>
+SADD snack:hate:<snack_id> <user_id>
+# 0 이 리턴되면
+SADD snack:like:<snack_id> <user_id>
+SREM snack:hate:<snack_id> <user_id>
+```
+
+- 첫번째, 두번째 방법 모두 -> 3번 커맨드
+- `SREM` 은 Set 의 크기에 영향을 받을 가능성이 크기 때문에 `SISMEMBER` 를 사용하는 방향으로 하자.
 
 ### Django 에의 적용
 
