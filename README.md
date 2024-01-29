@@ -551,7 +551,7 @@ Cache 는 하드디스크, 메모리 등 빠른 I/O 를 이용한 DB 혹은 시�
 
 ```mermaid
 ---
-title: 간식 주문 시 중복 간식 검사 시퀀스
+title: Redis 를 이용한 통계 계산 시퀀스
 ---
 sequenceDiagram
     participant U as User
