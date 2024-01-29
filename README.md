@@ -676,6 +676,25 @@ SREM snack:like:<snack_id> <user_id>
 
 ### Django 에의 적용
 
+```python
+from django.core.cache import cache
+
+snack_id = snack.id
+user_id = user.id
+reaction_type = request.data.get('type')
+like_key = f'snack:like:{snack_id}'
+hate_key = f'snack:hate:{snack_id}'
+
+if reaction_type == ReactionType.LIKE:
+  if not cache.sismember(like_key, user_id):
+    cache.sadd(like_key, user_id)
+    cache.srem(hate_key, user_id)
+if reaction_type == ReactionType.HATE:
+  if not cache.sismember(hate_key, user_id):
+    cache.sadd(hate_key, user_id)
+    cache.srem(like_key, user_id)
+```
+
 # Model
 
 아래의 ERD 는 초기 설계용 이며, 개발이 진행되면서 추가 혹은 삭제되는 요소가 있을 수 있습니다.
