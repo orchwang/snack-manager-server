@@ -549,6 +549,10 @@ Cache 는 하드디스크, 메모리 등 빠른 I/O 를 이용한 DB 혹은 시�
 
 ## 간식 좋아요 합계
 
+- 아래와 같이 구성하였으나 Redis Cache 는 메모리 기반 key, valud DB 로 데이터가 휘발성 이기 때문에 Cache 만 사용해서는 오차가 발생할 가능성이 크다.
+- Cache 에 해당 간식의 reaction 수치가 존재하지 않으면 DB 를 참조하는 것으로 변경
+- 위와 같은 조치로 사실상 cache 사용이 큰 성능상 이득을 가져다 주지는 않을것으로 예상되어 더 나은 대안이 필요하다고 생각됨
+
 ```mermaid
 ---
 title: Redis 를 이용한 통계 계산 시퀀스
@@ -580,6 +584,76 @@ sequenceDiagram
     STA-->>U: 통계 수치 Response
     Note over U,STA: Scheduler 에 의해 합산된 통계를 프론트에서 활용
 ```
+
+## 2024-01-29 New Idea
+
+- 실시간 트래픽이 굉장히 많은 사이트를 가정해볼 경우 좋아요가 1초에 몇만개 이상 발생할 가능성이 있다.
+- 트래픽 발생 시 마다 RDS row 의 값을 update 하는 일은 DB 에 직접적인 영향을 끼친다.
+- 또한 단순 개수만이 아닌 누가 눌렀는지도 파악할 수 있어야 한다.
+- 이럴 때 Redis 의 Set 을 통해 간단히 구현할 수 있다고 함.
+
+### How?
+
+- 댓글 id 를 기준으로 (여기서는 간식 id 일듯) 좋아요를 누른 사용자의 id 를 set에 저장하면 중복 없이 데이터 저장 가능
+- 간식 12544 좋아요를 누른 사용자는 345, 25, 967 이다.
+
+```mermaid
+---
+title: Redis Set 을 이용한 Reaction 구성
+---
+flowchart LR
+    key1[snack:like:12544]
+    key2[snack:like:19967]
+    
+    subgraph one
+      345
+      25
+      967
+    end
+    subgraph two
+      508
+      86
+      167
+      816
+    end
+    
+    key1-->one
+    key2-->two
+```
+
+```redis
+SADD snack-like:12544 967
+```
+
+- 각 간식 별로 좋아요를 누른 수는 SCARD 커맨드로 확인할 수 있다.
+
+```redis
+SCARD snack-like:12544
+(integer) 3
+```
+
+- 본 시스템 에서는 좋아요, 싫어요가 존재하며 개별 간식 당 가지는 Redis Set 은 아래와 같다.
+ 
+```text
+snack:like:<snack_id>
+snack:hate:<snack_id>
+```
+
+- 단일 사용자가 동일 간식에 동일 리액션을 여러번 남기지 못해야 한다.
+- 단일 사용자는 동일 간식에 1개의 리액션만 남길 수 있으며, 좋아요, 싫어요 간 토글이 가능해야 한다.
+- 위 두가지 조건을 아래로 해결한다.
+  - like, hate 모든 리액션 삭제 후 재등록
+
+```redis
+SREM snack:like:<snack_id> <user_id>
+SREM snack:hate:<snack_id> <user_id>
+
+SADD snack:hate:<snack_id> <user_id>
+```
+
+- 등록되어 있지 않아도 삭제하는 낭비가 발생하고 있으나, 검사하는 비용 보다는 덜 들것으로 보임
+
+### Django 에의 적용
 
 # Model
 
