@@ -695,6 +695,17 @@ if reaction_type == ReactionType.HATE:
     cache.srem(like_key, user_id)
 ```
 
+```python
+from django.core.cache import cache
+
+snack_id = snack.id
+like_key = f'snack:like:{snack_id}'
+hate_key = f'snack:hate:{snack_id}'
+
+like_count = cache.scard(like_key)
+hate_count = cache.scard(hate_key)
+```
+
 # Model
 
 아래의 ERD 는 초기 설계용 이며, 개발이 진행되면서 추가 혹은 삭제되는 요소가 있을 수 있습니다.
