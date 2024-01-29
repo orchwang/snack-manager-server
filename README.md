@@ -655,13 +655,20 @@ SADD snack:hate:<snack_id> <user_id>
 - 하지만 설계 해 본다.
 
 ```redis
+# 좋아요 체크하는 경우
 SISMEMBER snack:like:<snack_id> <user_id>
-# 1 이 리턴되면
-SREM snack:like:<snack_id> <user_id>
-SADD snack:hate:<snack_id> <user_id>
+# 1 이 리턴되면 프로세스 종료
 # 0 이 리턴되면
 SADD snack:like:<snack_id> <user_id>
 SREM snack:hate:<snack_id> <user_id>
+
+# 싫어요 체크하는 경우
+SISMEMBER snack:hate:<snack_id> <user_id>
+# 1 이 리턴되면 프로세스 종료
+# 0 이 리턴되면
+SADD snack:hate:<snack_id> <user_id>
+SREM snack:like:<snack_id> <user_id>
+
 ```
 
 - 첫번째, 두번째 방법 모두 -> 3번 커맨드
