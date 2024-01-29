@@ -233,7 +233,7 @@ class TestPostOrderView:
         client.force_authenticate(member_user_1)
 
         snacks = []
-        for snack in dummy_snacks_set_1:
+        for snack in [dummy_snacks_set_1[0], dummy_snacks_set_1[1], dummy_snacks_set_1[3]]:
             snacks.append({'uid': snack.uid, 'quantity': random.randrange(1, 40)})
         payload = {
             'snacks': snacks,
@@ -241,6 +241,9 @@ class TestPostOrderView:
 
         response = client.post('/orders/', payload, format='json')
         assert response.status_code == 400
+
+        response_json = response.json()
+        assert response_json['detail'] == 'You cannot order when not delivered snack is in your order.'
 
     @pytest.mark.django_db
     def test_create_order_with_invalid_snack_response_status_400(self, member_user_1, dummy_snacks_set_1):

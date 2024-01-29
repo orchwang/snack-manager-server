@@ -34,7 +34,7 @@ class OrderWriteSerializer(serializers.Serializer):
         if not snacks_list:
             raise InvalidRequest('You cannot order without snacks.')
 
-        self._check_not_delivered_orders_exists()
+        # self._check_not_delivered_orders_exists()
 
         snack_instance_list = self._check_snack_list_valid(snacks_list)
 
@@ -51,7 +51,9 @@ class OrderWriteSerializer(serializers.Serializer):
 
     def _check_snack_list_valid(self, snacks_list: List):
         not_delivered_orders = Order.objects.not_delivered().values_list('id', flat=True)
-        snack_ids_in_not_delivered_orders = Purchase.objects.filter(order_id__in=not_delivered_orders)
+        snack_ids_in_not_delivered_orders = Purchase.objects.filter(order_id__in=not_delivered_orders).values_list(
+            'snack_id', flat=True
+        )
 
         snack_instance_list = []
         for snack in snacks_list:
@@ -60,7 +62,7 @@ class OrderWriteSerializer(serializers.Serializer):
 
                 # 배송 시작 전 주문에 이미 존재하는 간식 여부 검사
                 if created_snack.id in snack_ids_in_not_delivered_orders:
-                    raise InvalidRequest('Rated with hate reactions more than like cannot be ordered.')
+                    raise InvalidRequest('You cannot order when not delivered snack is in your order.')
 
                 # 좋아요 비율 검사
                 if created_snack.like_ratio < 1:
