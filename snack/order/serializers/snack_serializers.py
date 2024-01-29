@@ -1,5 +1,7 @@
 from django.contrib.auth import get_user_model
 
+from django_redis import get_redis_connection
+
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
@@ -18,13 +20,15 @@ class SnackSerializer(serializers.ModelSerializer):
 
     @extend_schema_field(OpenApiTypes.INT)
     def get_like_reaction_count(self, obj):
-        # return cache.get(f'{obj.uid}-{SnackReactionType.LIKE.value}', 0)
-        return obj.snack_reactions.filter(type=SnackReactionType.LIKE).count()
+        like_key = f'snack:like:{obj.id}'
+        redis_con = get_redis_connection('default')
+        return redis_con.scard(like_key)
 
     @extend_schema_field(OpenApiTypes.INT)
     def get_hate_reaction_count(self, obj):
-        # return cache.get(f'{obj.uid}-{SnackReactionType.HATE.value}', 0)
-        return obj.snack_reactions.filter(type=SnackReactionType.HATE).count()
+        hate_key = f'snack:hate:{obj.id}'
+        redis_con = get_redis_connection('default')
+        return redis_con.scard(hate_key)
 
 
 class SnackDetailSerializer(serializers.ModelSerializer):
@@ -37,11 +41,15 @@ class SnackDetailSerializer(serializers.ModelSerializer):
 
     @extend_schema_field(OpenApiTypes.INT)
     def get_like_reaction_count(self, obj):
-        return obj.snack_reactions.filter(type=SnackReactionType.LIKE).count()
+        like_key = f'snack:like:{obj.id}'
+        redis_con = get_redis_connection('default')
+        return redis_con.scard(like_key)
 
     @extend_schema_field(OpenApiTypes.INT)
     def get_hate_reaction_count(self, obj):
-        return obj.snack_reactions.filter(type=SnackReactionType.HATE).count()
+        hate_key = f'snack:hate:{obj.id}'
+        redis_con = get_redis_connection('default')
+        return redis_con.scard(hate_key)
 
 
 class SnackWriteSerializer(serializers.ModelSerializer):

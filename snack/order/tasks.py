@@ -1,8 +1,8 @@
 from django.apps import apps
-from django.core.cache import cache
+
+from django_redis import get_redis_connection
 
 from snack.celery import app
-from snack.order.constants import SnackReactionType
 
 
 @app.task
@@ -10,13 +10,13 @@ def update_snack_reaction_statistics(snack_uid: str):
     Snack = apps.get_model('order', 'Snack')
     snack = Snack.objects.get(uid=snack_uid)
 
-    like_count = cache.get(f'{snack.uid}-{SnackReactionType.LIKE.value}')
-    if not like_count:
-        like_count = snack.get_like_reaction_count()
+    redis_con = get_redis_connection('default')
 
-    hate_count = cache.get(f'{snack.uid}-{SnackReactionType.HATE.value}')
-    if not hate_count:
-        hate_count = snack.get_hate_reaction_count()
+    like_key = f'snack:like:{snack.id}'
+    hate_key = f'snack:hate:{snack.id}'
+
+    like_count = redis_con.scard(like_key)
+    hate_count = redis_con.scard(hate_key)
 
     if not hate_count:
         like_ratio = like_count

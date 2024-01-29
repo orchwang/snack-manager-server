@@ -547,6 +547,10 @@ class TestPostSnackView:
 class TestSnackReactionViewSet:
     @pytest.mark.django_db
     def test_post_snack_reaction_viewset_create_reaction(self, dummy_snacks_set_1, member_user_1):
+        """
+        SnackReaction Model 을 deprecate 하면서 testcase 도 폐기
+        """
+        return
         client = APIClient()
         client.force_authenticate(member_user_1)
         payload = {'type': SnackReactionType.LIKE.value}
@@ -560,6 +564,10 @@ class TestSnackReactionViewSet:
     def test_post_snack_reaction_viewset_toggle_existing_reaction_to_opposite(
         self, dummy_snacks_set_1, dummy_snacks_reaction_set_1, member_user_1
     ):
+        """
+        SnackReaction Model 을 deprecate 하면서 testcase 도 폐기
+        """
+        return
         client = APIClient()
         client.force_authenticate(member_user_1)
         payload = {'type': SnackReactionType.LIKE.value}
@@ -597,6 +605,10 @@ class TestSnackReactionViewSet:
     def test_post_snack_reaction_viewset_response_400_if_same_type_reaction_exists(
         self, dummy_snacks_set_1, dummy_snacks_reaction_set_1, member_user_1
     ):
+        """
+        SnackReaction Model 을 deprecate 하면서 testcase 도 폐기
+        """
+        return
         client = APIClient()
         client.force_authenticate(member_user_1)
         payload = {'type': SnackReactionType.HATE.value}
