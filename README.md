@@ -677,7 +677,9 @@ SREM snack:like:<snack_id> <user_id>
 ### Django 에의 적용
 
 ```python
-from django.core.cache import cache
+from django_redis import get_redis_connection
+
+redis_con = get_redis_connection('default')
 
 snack_id = snack.id
 user_id = user.id
@@ -686,24 +688,26 @@ like_key = f'snack:like:{snack_id}'
 hate_key = f'snack:hate:{snack_id}'
 
 if reaction_type == ReactionType.LIKE:
-  if not cache.sismember(like_key, user_id):
-    cache.sadd(like_key, user_id)
-    cache.srem(hate_key, user_id)
+  if not redis_con.sismember(like_key, user_id):
+    redis_con.sadd(like_key, user_id)
+    redis_con.srem(hate_key, user_id)
 if reaction_type == ReactionType.HATE:
-  if not cache.sismember(hate_key, user_id):
-    cache.sadd(hate_key, user_id)
-    cache.srem(like_key, user_id)
+  if not redis_con.sismember(hate_key, user_id):
+    redis_con.sadd(hate_key, user_id)
+    redis_con.srem(like_key, user_id)
 ```
 
 ```python
-from django.core.cache import cache
+from django_redis import get_redis_connection
+
+redis_con = get_redis_connection('default')
 
 snack_id = snack.id
 like_key = f'snack:like:{snack_id}'
 hate_key = f'snack:hate:{snack_id}'
 
-like_count = cache.scard(like_key)
-hate_count = cache.scard(hate_key)
+like_count = redis_con.scard(like_key)
+hate_count = redis_con.scard(hate_key)
 ```
 
 # Model
