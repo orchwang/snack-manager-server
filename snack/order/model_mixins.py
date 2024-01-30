@@ -104,8 +104,9 @@ class OrderMixin:
         self.save()
 
     def check_has_hated_snacks(self) -> bool:
-        purchases = self.purchases.all()
-        for snack in purchases:
-            if snack.like_ratio < 1:
-                return True
-        return False
+        Snack = apps.get_model('order', 'Snack')
+        snack_ids_list = self.purchases.values_list('id', flat=True)
+        hated_snacks_count = Snack.objects.filter(id__in=snack_ids_list).filter(like_ratio__lt=1).count()
+        if not hated_snacks_count:
+            return False
+        return True
