@@ -3,7 +3,7 @@ from typing import Optional, List
 from rest_framework import serializers
 
 from snack.core.exceptions import InvalidRequest
-from snack.order.models import Purchase, Order, Snack
+from snack.order.models import Purchase, Order, Snack, TestOrder
 from snack.order.constants import OrderStatus
 from snack.order.serializers.snack_serializers import SnackSerializer
 
@@ -120,3 +120,9 @@ class OrderStatusUpdateSerializer(serializers.Serializer):
         instance.update_status(status_to_update, estimated_arrival_time)
 
         return Order.objects.get(pk=instance.pk)
+
+
+class TestOrderListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TestOrder
+        fields = '__all__'

@@ -6,8 +6,9 @@ from snack.order.serializers.order_serializers import (
     OrderSerializer,
     OrderDetailSerializer,
     OrderStatusUpdateSerializer,
+    TestOrderListSerializer,
 )
-from snack.order.models import Purchase, Order
+from snack.order.models import Purchase, Order, TestOrder
 from snack.order.serializers.snack_serializers import SnackReactionSerializer, SnackReactionWriteSerializer
 from snack.order.constants import SnackReactionType, OrderStatus
 
@@ -127,3 +128,20 @@ class TestOrderStatusUpdateSerializer:
         serializer.is_valid()
         result = serializer.save()
         assert result.status == OrderStatus.COMPLETED
+
+
+class TestTestOrderListSeralizer:
+    @pytest.mark.django_db
+    def test_test_order_list_serailizer_works(
+        self, test_order_item_1, test_order_item_2, test_order_item_3, test_order_item_4, test_order_item_5
+    ):
+        test_orders = TestOrder.objects.all()
+        serializer = TestOrderListSerializer(test_orders, many=True)
+        data = serializer.data
+
+        assert len(data) == 5
+        assert data[0]['uid'] == test_order_item_1.uid
+        assert data[1]['uid'] == test_order_item_2.uid
+        assert data[2]['uid'] == test_order_item_3.uid
+        assert data[3]['uid'] == test_order_item_4.uid
+        assert data[4]['uid'] == test_order_item_5.uid

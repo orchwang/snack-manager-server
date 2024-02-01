@@ -7,8 +7,8 @@ from django.contrib.auth import get_user_model
 from django.core.files import File
 from django.core.files.uploadedfile import SimpleUploadedFile
 
-from snack.order.constants import Currency, SnackReactionType
-from snack.order.models import Snack, Order, Purchase, SnackReaction
+from snack.order.constants import Currency, SnackReactionType, OrderStatus
+from snack.order.models import Snack, Order, Purchase, SnackReaction, TestOrder
 
 User = get_user_model()
 
@@ -137,3 +137,28 @@ def dummy_snacks_reaction_set_1(dummy_snacks_set_1, member_user_1, member_user_2
         snack.save()
 
     return snack_reactions
+
+
+@pytest.fixture
+def test_order_item_1(member_user_1):
+    return TestOrder.objects.create(user=member_user_1, status=OrderStatus.CREATED)
+
+
+@pytest.fixture
+def test_order_item_2(member_user_1):
+    return TestOrder.objects.create(user=member_user_1, status=OrderStatus.ORDERED)
+
+
+@pytest.fixture
+def test_order_item_3(member_user_1):
+    return TestOrder.objects.create(user=member_user_1, status=OrderStatus.APPROVED)
+
+
+@pytest.fixture
+def test_order_item_4(member_user_1):
+    return TestOrder.objects.create(user=member_user_1, status=OrderStatus.SHIPPING)
+
+
+@pytest.fixture
+def test_order_item_5(member_user_1):
+    return TestOrder.objects.create(user=member_user_1, status=OrderStatus.COMPLETED)

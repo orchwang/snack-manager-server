@@ -628,3 +628,65 @@ class TestSnackReactionViewSet:
         payload = {'type': 'INVALIDTYPE'}
         response = client.post(f'/snacks/{dummy_snacks_set_1[0].uid}/reaction/', payload, format='json')
         assert response.status_code == 400
+
+
+class TestGetTestOrderListView:
+    @pytest.mark.django_db
+    def test_get_test_order_list_response_status_200(
+        self,
+        member_user_1,
+        test_order_item_1,
+        test_order_item_2,
+        test_order_item_3,
+        test_order_item_4,
+        test_order_item_5,
+    ):
+        client = APIClient()
+        client.force_authenticate(member_user_1)
+
+        response = client.get('/test-orders/')
+        assert response.status_code == 200
+
+        response_json = response.json()
+        assert response_json
+        assert len(response_json) == 5
+        assert response_json[0]['uid'] == test_order_item_1.uid
+        assert response_json[1]['uid'] == test_order_item_2.uid
+        assert response_json[2]['uid'] == test_order_item_3.uid
+        assert response_json[3]['uid'] == test_order_item_4.uid
+        assert response_json[4]['uid'] == test_order_item_5.uid
+
+    @pytest.mark.django_db
+    def test_get_test_order_list_without_data_response_empty_list(
+        self,
+        member_user_1,
+    ):
+        client = APIClient()
+        client.force_authenticate(member_user_1)
+
+        response = client.get('/test-orders/')
+        assert response.status_code == 200
+
+        response_json = response.json()
+        assert not response_json
+
+    @pytest.mark.django_db
+    def test_get_test_order_list_with_filter_response_filtered_data(
+        self,
+        member_user_1,
+        test_order_item_1,
+        test_order_item_2,
+        test_order_item_3,
+        test_order_item_4,
+        test_order_item_5,
+    ):
+        client = APIClient()
+        client.force_authenticate(member_user_1)
+
+        response = client.get(f'/test-orders/?uid={test_order_item_4.uid}')
+        assert response.status_code == 200
+
+        response_json = response.json()
+        assert response_json
+        assert len(response_json) == 1
+        assert response_json[0]['uid'] == test_order_item_4.uid

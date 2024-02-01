@@ -1,8 +1,9 @@
 import pytest
+from django.db import IntegrityError
 from django.utils import timezone
 
 from snack.order.constants import OrderStatus
-from snack.order.models import Order
+from snack.order.models import Order, TestOrder
 from snack.order.exceptions import InvalidOrderStatusFlow
 
 
@@ -185,3 +186,25 @@ class TestOrderModelManager:
         not_delivered_orders = Order.objects.not_delivered().all()
         for order in not_delivered_orders:
             assert order.status not in [OrderStatus.CANCELLED, OrderStatus.COMPLETED]
+
+
+class TestTestOrder:
+    @pytest.mark.django_db
+    def test_create_test_order_success(self, member_user_1):
+        created_test_order = TestOrder.objects.create(user=member_user_1, status=OrderStatus.CREATED)
+        assert created_test_order.user == member_user_1
+        assert created_test_order.status == OrderStatus.CREATED
+
+    @pytest.mark.django_db
+    def test_create_test_order_without_user_success(self):
+        with pytest.raises(IntegrityError) as exc_info:
+            TestOrder.objects.create(status=OrderStatus.CREATED)
+        assert str(exc_info.value) == 'NOT NULL constraint failed: order_testorder.user_id'
+
+    @pytest.mark.django_db
+    def test_create_test_created_at_is_valid(self, member_user_1):
+        created_test_order = TestOrder.objects.create(user=member_user_1, status=OrderStatus.CREATED)
+        now = timezone.now()
+        assert created_test_order.created_at.year == now.year
+        assert created_test_order.created_at.month == now.month
+        assert created_test_order.created_at.day == now.day

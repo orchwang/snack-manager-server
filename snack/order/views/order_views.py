@@ -8,16 +8,17 @@ from django_filters.rest_framework import DjangoFilterBackend
 
 from snack.core.exceptions import InvalidRequest
 from snack.core.permissions import IsActive, IsAdmin
-from snack.order.filters import OrderFilter
+from snack.order.filters import OrderFilter, TestOrderFilter
 from snack.order.serializers.order_serializers import (
     OrderSerializer,
     OrderDetailSerializer,
     OrderWriteSerializer,
     OrderUpdateSerializer,
     OrderStatusUpdateSerializer,
+    TestOrderListSerializer,
 )
 from snack.order.serializers.snack_serializers import SnackDetailSerializer
-from snack.order.models import Order, Snack, Purchase
+from snack.order.models import Order, Snack, Purchase, TestOrder
 
 
 @extend_schema(description='등록된 간식 주문 목록을 불러옵니다.', responses={200: OrderSerializer}, methods=['GET'])
@@ -120,3 +121,10 @@ class OrderStatusUpdateView(generics.UpdateAPIView):
     serializer_class = OrderStatusUpdateSerializer
     permission_classes = [IsAuthenticated, IsActive, IsAdmin]
     lookup_field = 'uid'
+
+
+class TestOrderListView(generics.ListAPIView):
+    queryset = TestOrder.objects
+    serializer_class = TestOrderListSerializer
+    filterset_class = TestOrderFilter
+    permission_classes = [IsAuthenticated]
